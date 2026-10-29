@@ -82,21 +82,19 @@ android {
     }
 
     /**
-     * Имя выходного APK: меняем префикс модуля "app" на бренд "dwind",
-     * сохраняя остальную часть имени AGP (buildType и суффикс -unsigned).
-     * Итог: dwind-debug.apk, dwind-release.apk, dwind-release-unsigned.apk.
+     * Имя выходного APK включает версию и тип сборки, чтобы файл был понятен
+     * при скачивании. Пример: dwind-1.0.0-release.apk, dwind-1.0.0-debug.apk,
+     * dwind-1.0.0-release-unsigned.apk.
      */
     @Suppress("DEPRECATION")
     applicationVariants.all {
         val variantName = name
+        val version = versionName ?: "0"
         outputs.all {
             val impl = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            val current = impl.outputFileName
-            impl.outputFileName = if (current != null && current.startsWith("app")) {
-                "dwind" + current.removePrefix("app")
-            } else {
-                "dwind-$variantName.apk"
-            }
+            val unsigned = impl.outputFileName?.contains("unsigned") == true
+            impl.outputFileName =
+                "dwind-$version-$variantName" + if (unsigned) "-unsigned.apk" else ".apk"
         }
     }
     packaging {
