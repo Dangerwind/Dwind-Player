@@ -1,0 +1,30 @@
+# ---------- Gradle ----------
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# ---------- Kotlin ----------
+.kotlin/
+
+# ---------- Android Studio / IntelliJ ----------
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# ---------- Локальная конфигурация и секреты ----------
+local.properties
+local.properties.bak
+keystore.properties
+keystore/
+*.jks
+*.keystore
+
+# ---------- OS ----------
+.DS_Store
+Thumbs.db
+
+# ---------- Прочее ----------
+инструкцуия.txt
+*.hprof
