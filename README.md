@@ -1,3 +1,9 @@
+🇷🇺 **Русская версия — ниже.** · [Перейти к русскому описанию ↓](#russian)
+
+---
+
+<a name="english" id="english"></a>
+
 <div align="center">
 
 # 🎧 Dwind Player
@@ -101,6 +107,10 @@ this is needed to show your songs.
 
 ---
 ---
+
+🇬🇧 **English version — above.** · [Back to English ↑](#english)
+
+<a name="russian" id="russian"></a>
 
 <div align="center">
 
