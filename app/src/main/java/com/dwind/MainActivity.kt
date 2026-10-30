@@ -1,6 +1,7 @@
 package com.dwind
 
 import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,11 +13,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.dwind.settings.AppSettings
+import com.dwind.settings.LocaleHelper
 import com.dwind.settings.ThemeMode
 import com.dwind.ui.DwindApp
+import com.dwind.ui.LocalizedContent
 import com.dwind.ui.theme.DwindTheme
 
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocaleHelper.wrap(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -36,8 +43,13 @@ class MainActivity : ComponentActivity() {
                 controller.isAppearanceLightStatusBars = false
                 controller.isAppearanceLightNavigationBars = !dark
             }
-            DwindTheme(themeMode = settings.themeMode) {
-                DwindApp()
+            // Локаль подменяем в самом Compose-дереве: смена языка применяется
+            // мгновенно, без пересоздания активности (иначе открытое меню пару
+            // кадров оставалось бы на прежнем языке).
+            LocalizedContent(mode = settings.languageMode) {
+                DwindTheme(themeMode = settings.themeMode) {
+                    DwindApp()
+                }
             }
         }
     }

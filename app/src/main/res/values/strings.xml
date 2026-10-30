@@ -1,4 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Dwind Player</string>
+
+    <!-- Общие действия -->
+    <string name="action_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_close">Close</string>
+    <string name="action_create">Create</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_yes">Yes</string>
+
+    <!-- Шапка и вкладки -->
+    <string name="header_subtitle">Audio player for those who care about the tempo of music</string>
+    <string name="tab_folders">Folders</string>
+    <string name="tab_playlists">Playlists</string>
+    <string name="menu_content_description">Menu</string>
+
+    <!-- Меню -->
+    <string name="menu_bpm_measurement">BPM measurement</string>
+    <string name="menu_theme">Theme: %1$s</string>
+    <string name="theme_label_system">system</string>
+    <string name="theme_label_light">light</string>
+    <string name="theme_label_dark">dark</string>
+    <string name="menu_show_genre">Show style</string>
+    <string name="menu_help">Help</string>
+    <string name="menu_about">About</string>
+
+    <!-- Переключение языка (всегда на целевом языке) -->
+    <string name="language_switch_to_english">Switch to English</string>
+    <string name="language_switch_to_russian">Переключить на русский</string>
+
+    <!-- Диалог темы -->
+    <string name="theme_dialog_title">Appearance</string>
+    <string name="theme_option_system">System</string>
+    <string name="theme_option_light">Light</string>
+    <string name="theme_option_dark">Dark</string>
+
+    <!-- Диалог измерения BPM -->
+    <string name="measurement_dialog_title">BPM measurement</string>
+    <string name="bpm_range_title">BPM range</string>
+    <string name="bpm_range_value">from %1$d to %2$d</string>
+    <string name="bpm_range_hint">Narrowing the range removes false doubling and recognition errors. Changing it does not recalculate already analyzed tracks — run the BPM analysis again.</string>
+    <string name="green_threshold_title">Green BPM threshold</string>
+    <string name="percent_format">%1$d%%</string>
+    <string name="green_threshold_hint">If the auto-detection confidence is at or above the threshold, the BPM number is green; below it — yellow-brown. Manual BPM is always blue.</string>
+
+    <!-- О программе -->
+    <string name="about_title">About</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_build_date">Build date: %1$s</string>
+    <string name="about_developer">Developer: Andrey Kokorev</string>
+    <string name="about_ai_note">The app was built with the help of AI agents.</string>
+
+    <!-- Мини-плеер -->
+    <string name="in_playlist">In playlist: %1$s</string>
+    <string name="cd_add_to_playlist">Add to playlist</string>
+    <string name="no_playlists">No playlists</string>
+    <string name="cd_shuffle">Shuffle</string>
+    <string name="cd_previous">Previous</string>
+    <string name="cd_play_pause">Play/Pause</string>
+    <string name="cd_next">Next</string>
+    <string name="cd_repeat">Repeat</string>
+
+    <!-- Tap-tempo -->
+    <string name="tap_tempo_title">Tap tempo: %1$s</string>
+    <string name="bpm_current">Now: %1$d BPM</string>
+    <string name="tap_button">Tap</string>
+    <string name="action_reset">Reset</string>
+    <string name="bpm_ready">✓ Done — the tempo is reliable, you can save</string>
+    <string name="bpm_can_save_style">You can save the current BPM by changing only the style</string>
+    <string name="tap_hint_first">Tap in time with the music</string>
+    <string name="tap_hint_more">Keep tapping: accuracy improves with each tap</string>
+    <string name="genre_field_label">Style</string>
+
+    <!-- Жанры -->
+    <string name="genre_other">Other</string>
+    <string name="genre_electronic">Electronic</string>
+    <string name="genre_rock">Rock</string>
+    <string name="genre_rocknroll">Rock\'n\'Roll</string>
+    <string name="genre_blues">Blues</string>
+    <string name="genre_pop">Pop</string>
+    <string name="genre_hiphop">Hip-hop</string>
+    <string name="genre_jazz">Jazz</string>
+    <string name="genre_dnb">Drum\'n\'Bass</string>
+    <string name="genre_classical">Classical</string>
+    <string name="genre_rnb">R\'nB / Soul</string>
+    <string name="genre_reggae">Reggae</string>
+    <string name="genre_folk">Folk</string>
+    <string name="genre_metal">Metal</string>
+    <string name="genre_punk">Punk</string>
+    <string name="genre_unknown">Unknown</string>
+
+    <!-- Папки -->
+    <string name="folders_title">Music folders</string>
+    <string name="all_files">All files</string>
+    <string name="need_music_access_title">Music access needed</string>
+    <string name="need_music_access_subtitle">Allow access to audio files so the app can find your tracks.</string>
+    <string name="need_music_access_picker_subtitle">Allow access to audio files to select tracks.</string>
+    <string name="empty_here_title">Nothing here</string>
+    <string name="empty_here_subtitle">There are no music files in this folder.</string>
+    <string name="cd_detect_bpm">Detect BPM</string>
+    <string name="calculating_bpm">calculating BPM…</string>
+    <string name="bpm_none">BPM –</string>
+    <string name="sort_name">Name</string>
+    <string name="sort_title">Title</string>
+    <string name="sort_bpm">BPM</string>
+    <string name="reanalyze_title">Recalculate BPM?</string>
+    <string name="reanalyze_folder_text">All tracks already have BPM. Recalculate BPM for all tracks in this folder?</string>
+    <string name="reanalyze_playlist_text">All tracks in this playlist already have BPM. Recalculate BPM for all tracks?</string>
+
+    <plurals name="track_count">
+        <item quantity="one">%1$d track</item>
+        <item quantity="other">%1$d tracks</item>
+    </plurals>
+
+    <!-- Плейлисты -->
+    <string name="my_playlists">My playlists</string>
+    <string name="playlists_empty_title">No playlists</string>
+    <string name="playlists_empty_subtitle">Create a playlist to collect tracks for your mood.</string>
+    <string name="create_playlist">Create playlist</string>
+    <string name="cd_rename">Rename</string>
+    <string name="cd_delete">Delete</string>
+    <string name="rename_playlist">Rename playlist</string>
+    <string name="playlist_name_label">Playlist name</string>
+    <string name="name_label">Name</string>
+    <string name="delete_playlist_title">Delete playlist</string>
+    <string name="delete_playlist_confirm">Delete playlist \"%1$s\"? This cannot be undone.</string>
+
+    <!-- Детали плейлиста -->
+    <string name="add_tracks">Add tracks</string>
+    <string name="playlist_empty_title">Playlist is empty</string>
+    <string name="playlist_empty_subtitle">Add tracks from your library.</string>
+    <string name="cd_remove_from_playlist">Remove from playlist</string>
+
+    <!-- Выбор треков -->
+    <string name="select_tracks">Select tracks</string>
+    <string name="select_all">Select all</string>
+    <string name="deselect_all">Deselect all</string>
+    <string name="mark_tracks">Select tracks</string>
+    <string name="selected_count">Selected: %1$d</string>
+    <string name="add_selected">Add (%1$d)</string>
+
+    <!-- Помощь -->
+    <string name="help_step_of">Step %1$d of %2$d</string>
+    <string name="help_finish">Finish</string>
+    <string name="help_next">Next</string>
+    <string name="help_header_title">Dwind Player</string>
+    <string name="help_header_text">An audio player that can measure the tempo of music (BPM).</string>
+    <string name="help_tabs_title">Folders and playlists</string>
+    <string name="help_tabs_text">Switch between device folders and playlists.</string>
+    <string name="help_menu_title">Menu</string>
+    <string name="help_menu_text">Settings: BPM measurement, theme, style and help.</string>
+    <string name="help_sort_name_title">Sort by name</string>
+    <string name="help_sort_name_text">\"Name\" — sort by file name.</string>
+    <string name="help_sort_title_title">Sort by title</string>
+    <string name="help_sort_title_text">\"Title\" — sort by track title.</string>
+    <string name="help_sort_bpm_title">Sort by BPM</string>
+    <string name="help_sort_bpm_text">\"BPM\" — sort by tempo.</string>
+    <string name="help_playlist_item_title">Playlists</string>
+    <string name="help_playlist_item_text">Tap a playlist to open it; the icons on the right rename and delete.</string>
+    <string name="help_create_playlist_title">Create playlist</string>
+    <string name="help_create_playlist_text">Collect tracks into playlists for your mood.</string>
+    <string name="help_add_tracks_title">Add tracks</string>
+    <string name="help_add_tracks_text">Add tracks from your library to this playlist.</string>
+    <string name="help_list_title">List</string>
+    <string name="help_list_text_tracks">Tap a row to play. The color of the BPM number shows the detection confidence.</string>
+    <string name="help_list_text_folders">Tap a folder to open it, tap a track to play.</string>
+    <string name="help_bpm_text_title">BPM number</string>
+    <string name="help_bpm_text_text">Tap the BPM number to enter the tempo manually and choose a style.</string>
+    <string name="help_bpm_detect_title">Detect BPM</string>
+    <string name="help_bpm_detect_text">Measures the BPM of this track only.</string>
+    <string name="help_bpm_button_title">BPM analysis</string>
+    <string name="help_bpm_button_text">Measures the BPM of all tracks in the current folder.</string>
+    <string name="help_playlist_bpm_text">Measures the BPM of all tracks in the playlist.</string>
+    <string name="help_player_title">Mini player</string>
+    <string name="help_player_text">Playback control and track shuffle.</string>
+    <string name="help_add_to_playlist_title">To playlist</string>
+    <string name="help_add_to_playlist_text">The \"+\" button adds the current track to a playlist.</string>
+    <string name="help_more_title">What else it can do</string>
+    <string name="help_recap">In short: BPM measurement (whole folder, single track and manual tapping), manual tempo and style entry, playlists, sorting, BPM and theme settings, mini player with shuffle.</string>
+    <string name="help_recap_missing_prefix">\n\nNot everything is visible on this screen. To try it — </string>
+    <string name="help_missing_bpm">open a folder or playlist with tracks — that\'s where BPM works</string>
+    <string name="help_missing_sort">in a folder with tracks there is sorting by file name, track title and BPM</string>
+    <string name="help_missing_playlists">on the \"Playlists\" tab you can create playlists and add tracks</string>
+    <string name="help_missing_player">play a track — a mini player will appear</string>
 </resources>

@@ -16,13 +16,24 @@ enum class ThemeMode {
     }
 }
 
+/** Язык интерфейса: как в системе, принудительно русский или английский. */
+enum class LanguageMode {
+    SYSTEM, RUSSIAN, ENGLISH;
+
+    companion object {
+        fun fromName(value: String?): LanguageMode =
+            entries.firstOrNull { it.name == value } ?: SYSTEM
+    }
+}
+
 /** Пользовательские настройки приложения, доступные из Compose. */
 data class SettingsState(
     val bpmMin: Int = DEFAULT_BPM_MIN,
     val bpmMax: Int = DEFAULT_BPM_MAX,
     val showGenre: Boolean = true,
     val greenThresholdPercent: Int = DEFAULT_GREEN_THRESHOLD_PERCENT,
-    val themeMode: ThemeMode = ThemeMode.SYSTEM
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val languageMode: LanguageMode = LanguageMode.SYSTEM
 ) {
     companion object {
         const val DEFAULT_BPM_MIN = 40
@@ -50,7 +61,8 @@ data class SettingsState(
  * поэтому держим один StateFlow, который читается как из Compose, так и из репозитория.
  */
 object AppSettings {
-    private const val PREFS = "app_settings"
+    const val PREFS = "app_settings"
+    const val KEY_LANGUAGE_MODE = "language_mode"
     private const val KEY_BPM_MIN = "bpm_min"
     private const val KEY_BPM_MAX = "bpm_max"
     private const val KEY_SHOW_GENRE = "show_genre"
@@ -73,7 +85,8 @@ object AppSettings {
             greenThresholdPercent = clampThreshold(
                 p.getInt(KEY_GREEN_THRESHOLD, SettingsState.DEFAULT_GREEN_THRESHOLD_PERCENT)
             ),
-            themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null))
+            themeMode = ThemeMode.fromName(p.getString(KEY_THEME_MODE, null)),
+            languageMode = LanguageMode.fromName(p.getString(KEY_LANGUAGE_MODE, null))
         )
     }
 
@@ -82,6 +95,7 @@ object AppSettings {
     val showGenre: Boolean get() = _state.value.showGenre
     val greenThresholdPercent: Int get() = _state.value.greenThresholdPercent
     val themeMode: ThemeMode get() = _state.value.themeMode
+    val languageMode: LanguageMode get() = _state.value.languageMode
 
     /** Порог зелёного цвета как доля 0..1 (для сравнения с уверенностью). */
     val greenThreshold: Double get() = _state.value.greenThresholdPercent / 100.0
@@ -115,6 +129,12 @@ object AppSettings {
     fun setThemeMode(mode: ThemeMode) {
         _state.value = _state.value.copy(themeMode = mode)
         prefs?.edit()?.putString(KEY_THEME_MODE, mode.name)?.apply()
+    }
+
+    /** Сохраняет язык интерфейса (как в системе / русский / английский). */
+    fun setLanguageMode(mode: LanguageMode) {
+        _state.value = _state.value.copy(languageMode = mode)
+        prefs?.edit()?.putString(KEY_LANGUAGE_MODE, mode.name)?.commit()
     }
 
     private fun clampMin(v: Int) = v.coerceIn(SettingsState.HARD_MIN, SettingsState.HARD_MAX - 1)

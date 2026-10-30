@@ -45,10 +45,12 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.dwind.R
 
 /** Один шаг интерактивного гайда: к какому элементу указывать и что рассказать. */
 data class HelpStep(
@@ -198,7 +200,7 @@ fun HelpGuide(
                         .verticalScroll(scrollState)
                 ) {
                     Text(
-                        text = "Шаг ${safeIndex + 1} из ${steps.size}",
+                        text = stringResource(R.string.help_step_of, safeIndex + 1, steps.size),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -220,10 +222,10 @@ fun HelpGuide(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Spacer(modifier = Modifier.weight(1f))
-                    TextButton(onClick = onFinish) { Text("Закончить") }
+                    TextButton(onClick = onFinish) { Text(stringResource(R.string.help_finish)) }
                     if (safeIndex < steps.lastIndex) {
                         Spacer(modifier = Modifier.width(4.dp))
-                        Button(onClick = { index = safeIndex + 1 }) { Text("Далее") }
+                        Button(onClick = { index = safeIndex + 1 }) { Text(stringResource(R.string.help_next)) }
                     }
                 }
             }

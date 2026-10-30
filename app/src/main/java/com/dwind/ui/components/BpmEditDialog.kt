@@ -31,10 +31,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dwind.R
 import com.dwind.bpm.Genres
+import com.dwind.ui.genreLabel
 import com.dwind.ui.rememberWindowSizeInfo
 import kotlin.math.roundToInt
 
@@ -113,7 +116,7 @@ fun BpmEditDialog(
                 shape = if (compact) MaterialTheme.shapes.small else MaterialTheme.shapes.medium
             ) {
                 Text(
-                    text = genre,
+                    text = genreLabel(genre),
                     modifier = Modifier.weight(1f),
                     maxLines = 1,
                     style = if (compact) MaterialTheme.typography.bodyMedium
@@ -130,7 +133,7 @@ fun BpmEditDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Стиль",
+                        text = stringResource(R.string.genre_field_label),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -138,7 +141,7 @@ fun BpmEditDialog(
                 }
             } else {
                 Text(
-                    text = "Стиль",
+                    text = stringResource(R.string.genre_field_label),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -150,7 +153,7 @@ fun BpmEditDialog(
             ) {
                 Genres.MANUAL_CHOICES.forEach { label ->
                     DropdownMenuItem(
-                        text = { Text(label) },
+                        text = { Text(genreLabel(label)) },
                         onClick = {
                             genre = label
                             genreMenuOpen = false
@@ -163,7 +166,7 @@ fun BpmEditDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Tap tempo: ${target.title}", maxLines = 1) },
+        title = { Text(stringResource(R.string.tap_tempo_title, target.title), maxLines = 1) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -171,7 +174,7 @@ fun BpmEditDialog(
             ) {
                 target.currentBpm?.let {
                     Text(
-                        text = "Сейчас: ${it.toInt()} BPM",
+                        text = stringResource(R.string.bpm_current, it.toInt()),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -185,7 +188,7 @@ fun BpmEditDialog(
                 ) {
                     Icon(Icons.Filled.TouchApp, contentDescription = null)
                     Text(
-                        text = "  Tap",
+                        text = "  ${stringResource(R.string.tap_button)}",
                         fontSize = if (shortScreen) 20.sp else 22.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -215,15 +218,15 @@ fun BpmEditDialog(
                             ready = false
                         },
                         enabled = taps.isNotEmpty()
-                    ) { Text("Сброс") }
+                    ) { Text(stringResource(R.string.action_reset)) }
                 }
                 Text(
                     text = when {
-                        ready -> "✓ Готово — темп определён надёжно, можно сохранять"
+                        ready -> stringResource(R.string.bpm_ready)
                         taps.size < 2 && target.currentBpm != null ->
-                            "Можно сохранить текущий BPM, изменив только стиль"
-                        taps.size < 2 -> "Стучи «Tap» ровно в такт музыке"
-                        else -> "Стучи дальше: точность улучшается с каждым нажатием"
+                            stringResource(R.string.bpm_can_save_style)
+                        taps.size < 2 -> stringResource(R.string.tap_hint_first)
+                        else -> stringResource(R.string.tap_hint_more)
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = if (ready) MaterialTheme.colorScheme.primary
@@ -242,10 +245,10 @@ fun BpmEditDialog(
                     value?.let { onSave(it, genre) }
                 },
                 enabled = savable
-            ) { Text("Сохранить") }
+            ) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
 }

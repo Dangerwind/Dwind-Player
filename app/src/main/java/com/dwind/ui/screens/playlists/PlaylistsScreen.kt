@@ -36,9 +36,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dwind.R
 import com.dwind.data.local.entity.PlaylistEntity
 import com.dwind.ui.components.EmptyState
 import com.dwind.ui.components.IconBadge
@@ -91,7 +93,7 @@ fun PlaylistsScreen(
                     .padding(bottom = playerInset)
                     .helpTarget("createPlaylist")
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Создать плейлист")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.create_playlist))
             }
         }
     ) { innerPadding ->
@@ -102,15 +104,15 @@ fun PlaylistsScreen(
                 .padding(bottom = playerInset)
         ) {
             Text(
-                text = "Мои плейлисты",
+                text = stringResource(R.string.my_playlists),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 6.dp)
             )
             if (uiState.playlists.isEmpty()) {
                 EmptyState(
                     icon = Icons.AutoMirrored.Filled.PlaylistPlay,
-                    title = "Плейлистов нет",
-                    subtitle = "Создайте плейлист, чтобы собирать треки под настроение.",
+                    title = stringResource(R.string.playlists_empty_title),
+                    subtitle = stringResource(R.string.playlists_empty_subtitle),
                     modifier = Modifier.fillMaxSize(),
                     action = {
                         Button(
@@ -118,7 +120,7 @@ fun PlaylistsScreen(
                             modifier = Modifier.helpTarget("createPlaylist")
                         ) {
                             Icon(Icons.Filled.Add, contentDescription = null)
-                            Text("  Создать плейлист")
+                            Text("  ${stringResource(R.string.create_playlist)}")
                         }
                     }
                 )
@@ -165,12 +167,12 @@ fun PlaylistsScreen(
                                     renameTarget = playlist
                                     renameName = playlist.name
                                 }) {
-                                    Icon(Icons.Filled.Edit, contentDescription = "Переименовать")
+                                    Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.cd_rename))
                                 }
                                 IconButton(onClick = { deleteTarget = playlist }) {
                                     Icon(
                                         Icons.Filled.Delete,
-                                        contentDescription = "Удалить",
+                                        contentDescription = stringResource(R.string.cd_delete),
                                         tint = MaterialTheme.colorScheme.error
                                     )
                                 }
@@ -185,12 +187,12 @@ fun PlaylistsScreen(
     if (showCreateDialog) {
         AlertDialog(
             onDismissRequest = { showCreateDialog = false; newPlaylistName = "" },
-            title = { Text("Создать плейлист") },
+            title = { Text(stringResource(R.string.create_playlist)) },
             text = {
                 OutlinedTextField(
                     value = newPlaylistName,
                     onValueChange = { newPlaylistName = it },
-                    label = { Text("Название плейлиста") },
+                    label = { Text(stringResource(R.string.playlist_name_label)) },
                     singleLine = true
                 )
             },
@@ -200,12 +202,12 @@ fun PlaylistsScreen(
                     showCreateDialog = false
                     newPlaylistName = ""
                 }) {
-                    Text("Создать")
+                    Text(stringResource(R.string.action_create))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCreateDialog = false; newPlaylistName = "" }) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -214,12 +216,12 @@ fun PlaylistsScreen(
     renameTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { renameTarget = null },
-            title = { Text("Переименовать плейлист") },
+            title = { Text(stringResource(R.string.rename_playlist)) },
             text = {
                 OutlinedTextField(
                     value = renameName,
                     onValueChange = { renameName = it },
-                    label = { Text("Название") },
+                    label = { Text(stringResource(R.string.name_label)) },
                     singleLine = true
                 )
             },
@@ -230,12 +232,12 @@ fun PlaylistsScreen(
                     }
                     renameTarget = null
                 }) {
-                    Text("Сохранить")
+                    Text(stringResource(R.string.action_save))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { renameTarget = null }) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -244,19 +246,19 @@ fun PlaylistsScreen(
     deleteTarget?.let { target ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Удалить плейлист") },
-            text = { Text("Удалить плейлист \"${target.name}\"? Это действие нельзя отменить.") },
+            title = { Text(stringResource(R.string.delete_playlist_title)) },
+            text = { Text(stringResource(R.string.delete_playlist_confirm, target.name)) },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.deletePlaylist(target)
                     deleteTarget = null
                 }) {
-                    Text("Удалить")
+                    Text(stringResource(R.string.action_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deleteTarget = null }) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )

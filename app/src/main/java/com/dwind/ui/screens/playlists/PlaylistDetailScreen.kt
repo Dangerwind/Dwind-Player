@@ -45,13 +45,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dwind.R
 import com.dwind.settings.AppSettings
 import com.dwind.ui.components.BpmEditTarget
 import com.dwind.ui.components.EmptyState
 import com.dwind.ui.components.IconBadge
+import com.dwind.ui.genreLabel
 import com.dwind.ui.help.helpTarget
 import com.dwind.ui.viewmodel.PlaylistDetailViewModel
 import com.dwind.ui.viewmodel.PlayerViewModel
@@ -122,7 +125,7 @@ fun PlaylistDetailScreen(
                     .padding(bottom = playerInset)
                     .helpTarget("addTracks")
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "Добавить треки")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.add_tracks))
             }
         }
     ) { innerPadding ->
@@ -132,7 +135,7 @@ fun PlaylistDetailScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                 }
                 Text(
                     text = displayName,
@@ -180,8 +183,8 @@ fun PlaylistDetailScreen(
             if (state.tracks.isEmpty()) {
                 EmptyState(
                     icon = Icons.AutoMirrored.Filled.PlaylistPlay,
-                    title = "Плейлист пуст",
-                    subtitle = "Добавьте треки из своей библиотеки.",
+                    title = stringResource(R.string.playlist_empty_title),
+                    subtitle = stringResource(R.string.playlist_empty_subtitle),
                     modifier = Modifier.fillMaxSize(),
                     action = {
                         Button(
@@ -191,7 +194,7 @@ fun PlaylistDetailScreen(
                             modifier = Modifier.helpTarget("addTracks")
                         ) {
                             Icon(Icons.Filled.Add, contentDescription = null)
-                            Text("  Добавить треки")
+                            Text("  ${stringResource(R.string.add_tracks)}")
                         }
                     }
                 )
@@ -252,7 +255,7 @@ fun PlaylistDetailScreen(
                                 val busy = state.bpmBusyIds.contains(track.id)
                                 if (busy) {
                                     Text(
-                                        text = "считаю BPM…",
+                                        text = stringResource(R.string.calculating_bpm),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -288,7 +291,7 @@ fun PlaylistDetailScreen(
                                         if (settings.showGenre) {
                                             info?.genre?.let { g ->
                                                 Text(
-                                                    text = g,
+                                                    text = genreLabel(g),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                     maxLines = 1
@@ -298,7 +301,7 @@ fun PlaylistDetailScreen(
                                     }
                                 } else {
                                     Text(
-                                        text = "BPM –",
+                                        text = stringResource(R.string.bpm_none),
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier
@@ -327,13 +330,13 @@ fun PlaylistDetailScreen(
                                         onClick = { viewModel.detectBpm(track, force = bpm != null) },
                                         modifier = detectAnchor
                                     ) {
-                                        Icon(Icons.Filled.Speed, contentDescription = "Определить BPM")
+                                        Icon(Icons.Filled.Speed, contentDescription = stringResource(R.string.cd_detect_bpm))
                                     }
                                 }
                                 IconButton(
                                     onClick = { viewModel.removeTrack(playlistId, track.id) }
                                 ) {
-                                    Icon(Icons.Filled.Delete, contentDescription = "Удалить из плейлиста")
+                                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_remove_from_playlist))
                                 }
                             }
                         }
@@ -361,16 +364,16 @@ fun PlaylistDetailScreen(
     if (showReanalyzeDialog) {
         AlertDialog(
             onDismissRequest = { showReanalyzeDialog = false },
-            title = { Text("Пересчитать BPM?") },
-            text = { Text("Все треки в этом плейлисте уже имеют BPM. Пересчитать BPM всех треков заново?") },
+            title = { Text(stringResource(R.string.reanalyze_title)) },
+            text = { Text(stringResource(R.string.reanalyze_playlist_text)) },
             confirmButton = {
                 TextButton(onClick = {
                     showReanalyzeDialog = false
                     viewModel.analyzeBpmForPlaylist(force = true)
-                }) { Text("Да") }
+                }) { Text(stringResource(R.string.action_yes)) }
             },
             dismissButton = {
-                TextButton(onClick = { showReanalyzeDialog = false }) { Text("Отмена") }
+                TextButton(onClick = { showReanalyzeDialog = false }) { Text(stringResource(R.string.action_cancel)) }
             }
         )
     }

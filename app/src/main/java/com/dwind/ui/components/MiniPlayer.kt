@@ -48,11 +48,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.Player
+import com.dwind.R
 import com.dwind.settings.AppSettings
+import com.dwind.ui.genreLabel
 import com.dwind.ui.help.helpTarget
 import com.dwind.ui.viewmodel.PlayerUiState
 import com.dwind.ui.viewmodel.PlayerViewModel
@@ -275,7 +278,7 @@ private fun TrackTitleBlock(
             )
             uiState.currentBpm?.let { bpm ->
                 val genreSuffix =
-                    if (showGenre) uiState.currentGenre?.let { g -> " · $g" } ?: "" else ""
+                    if (showGenre) uiState.currentGenre?.let { g -> " · ${genreLabel(g)}" } ?: "" else ""
                 Text(
                     text = " ${bpm.toInt()} BPM$genreSuffix",
                     style = MaterialTheme.typography.labelMedium,
@@ -297,7 +300,10 @@ private fun TrackTitleBlock(
         }
         if (uiState.currentTrackInPlaylists.isNotEmpty()) {
             Text(
-                text = "В плейлисте: ${uiState.currentTrackInPlaylists.joinToString(", ") { it.name }}",
+                text = stringResource(
+                    R.string.in_playlist,
+                    uiState.currentTrackInPlaylists.joinToString(", ") { it.name }
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.primary,
                 maxLines = 1,
@@ -325,7 +331,7 @@ private fun TransportControls(
             IconButton(onClick = { onShowPlaylistMenuChange(true) }) {
                 Icon(
                     if (uiState.currentTrackInPlaylists.isNotEmpty()) Icons.Filled.LibraryMusic else Icons.Filled.Add,
-                    contentDescription = "Добавить в плейлист",
+                    contentDescription = stringResource(R.string.cd_add_to_playlist),
                     tint = if (uiState.currentTrackInPlaylists.isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
@@ -335,7 +341,7 @@ private fun TransportControls(
             ) {
                 if (uiState.playlists.isEmpty()) {
                     DropdownMenuItem(
-                        text = { Text("Нет плейлистов") },
+                        text = { Text(stringResource(R.string.no_playlists)) },
                         onClick = { onShowPlaylistMenuChange(false) }
                     )
                 } else {
@@ -358,16 +364,19 @@ private fun TransportControls(
             active = uiState.shuffleModeEnabled,
             onClick = { playerViewModel.toggleShuffle() },
             icon = Icons.Filled.Shuffle,
-            contentDescription = "Играть вперемешку"
+            contentDescription = stringResource(R.string.cd_shuffle)
         )
         IconButton(onClick = { playerViewModel.previous() }) {
-            Icon(Icons.Filled.SkipPrevious, contentDescription = "Previous")
+            Icon(Icons.Filled.SkipPrevious, contentDescription = stringResource(R.string.cd_previous))
         }
         IconButton(onClick = { playerViewModel.playPause() }) {
-            Icon(if (uiState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow, contentDescription = "Play/Pause")
+            Icon(
+                if (uiState.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                contentDescription = stringResource(R.string.cd_play_pause)
+            )
         }
         IconButton(onClick = { playerViewModel.next() }) {
-            Icon(Icons.Filled.SkipNext, contentDescription = "Next")
+            Icon(Icons.Filled.SkipNext, contentDescription = stringResource(R.string.cd_next))
         }
         MiniToggleButton(
             active = uiState.repeatMode != Player.REPEAT_MODE_OFF,
@@ -376,7 +385,7 @@ private fun TransportControls(
                 Player.REPEAT_MODE_ONE -> Icons.Filled.RepeatOne
                 else -> Icons.Filled.Repeat
             },
-            contentDescription = "Повтор"
+            contentDescription = stringResource(R.string.cd_repeat)
         )
     }
 }

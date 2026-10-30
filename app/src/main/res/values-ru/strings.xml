@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dwind Player</string>
+
+    <!-- Общие действия -->
+    <string name="action_back">Назад</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_save">Сохранить</string>
+    <string name="action_close">Закрыть</string>
+    <string name="action_create">Создать</string>
+    <string name="action_delete">Удалить</string>
+    <string name="action_yes">Да</string>
+
+    <!-- Шапка и вкладки -->
+    <string name="header_subtitle">Аудиоплеер для тех, кому важно знать темп музыки</string>
+    <string name="tab_folders">Папки</string>
+    <string name="tab_playlists">Плейлисты</string>
+    <string name="menu_content_description">Меню</string>
+
+    <!-- Меню -->
+    <string name="menu_bpm_measurement">Измерение BPM</string>
+    <string name="menu_theme">Тема: %1$s</string>
+    <string name="theme_label_system">как в системе</string>
+    <string name="theme_label_light">светлая</string>
+    <string name="theme_label_dark">тёмная</string>
+    <string name="menu_show_genre">Отображать стиль</string>
+    <string name="menu_help">Помощь</string>
+    <string name="menu_about">О программе</string>
+
+    <!-- Переключение языка (всегда на целевом языке) -->
+    <string name="language_switch_to_english">Switch to English</string>
+    <string name="language_switch_to_russian">Переключить на русский</string>
+
+    <!-- Диалог темы -->
+    <string name="theme_dialog_title">Тема оформления</string>
+    <string name="theme_option_system">Как в системе</string>
+    <string name="theme_option_light">Светлая</string>
+    <string name="theme_option_dark">Тёмная</string>
+
+    <!-- Диалог измерения BPM -->
+    <string name="measurement_dialog_title">Измерение BPM</string>
+    <string name="bpm_range_title">Диапазон BPM</string>
+    <string name="bpm_range_value">от %1$d до %2$d</string>
+    <string name="bpm_range_hint">Сужение диапазона убирает ложное удвоение и ошибки распознавания. Изменение не пересчитывает уже посчитанные треки — запустите BPM-анализ заново.</string>
+    <string name="green_threshold_title">Порог «зелёного» BPM</string>
+    <string name="percent_format">%1$d%%</string>
+    <string name="green_threshold_hint">Если уверенность автоопределения не ниже порога — цифра BPM зелёная, ниже порога — жёлто-коричневая. Ручной BPM всегда синий.</string>
+
+    <!-- О программе -->
+    <string name="about_title">О программе</string>
+    <string name="about_version">Версия %1$s</string>
+    <string name="about_build_date">Дата сборки: %1$s</string>
+    <string name="about_developer">Разработчик: Андрей Кокорев</string>
+    <string name="about_ai_note">Приложение создано с использованием ИИ-агентов.</string>
+
+    <!-- Мини-плеер -->
+    <string name="in_playlist">В плейлисте: %1$s</string>
+    <string name="cd_add_to_playlist">Добавить в плейлист</string>
+    <string name="no_playlists">Нет плейлистов</string>
+    <string name="cd_shuffle">Играть вперемешку</string>
+    <string name="cd_previous">Предыдущий</string>
+    <string name="cd_play_pause">Играть/Пауза</string>
+    <string name="cd_next">Следующий</string>
+    <string name="cd_repeat">Повтор</string>
+
+    <!-- Tap-tempo -->
+    <string name="tap_tempo_title">Tap tempo: %1$s</string>
+    <string name="bpm_current">Сейчас: %1$d BPM</string>
+    <string name="tap_button">Tap</string>
+    <string name="action_reset">Сброс</string>
+    <string name="bpm_ready">✓ Готово — темп определён надёжно, можно сохранять</string>
+    <string name="bpm_can_save_style">Можно сохранить текущий BPM, изменив только стиль</string>
+    <string name="tap_hint_first">Стучи «Tap» ровно в такт музыке</string>
+    <string name="tap_hint_more">Стучи дальше: точность улучшается с каждым нажатием</string>
+    <string name="genre_field_label">Стиль</string>
+
+    <!-- Жанры -->
+    <string name="genre_other">Иное</string>
+    <string name="genre_electronic">Электроника</string>
+    <string name="genre_rock">Рок</string>
+    <string name="genre_rocknroll">Рок-н-ролл</string>
+    <string name="genre_blues">Блюз</string>
+    <string name="genre_pop">Поп</string>
+    <string name="genre_hiphop">Хип-хоп</string>
+    <string name="genre_jazz">Джаз</string>
+    <string name="genre_dnb">Drum\'n\'Bass</string>
+    <string name="genre_classical">Классика</string>
+    <string name="genre_rnb">R\'nB / Соул</string>
+    <string name="genre_reggae">Регги</string>
+    <string name="genre_folk">Фолк</string>
+    <string name="genre_metal">Метал</string>
+    <string name="genre_punk">Панк</string>
+    <string name="genre_unknown">Неизвестно</string>
+
+    <!-- Папки -->
+    <string name="folders_title">Папки с музыкой</string>
+    <string name="all_files">Все файлы</string>
+    <string name="need_music_access_title">Нужен доступ к музыке</string>
+    <string name="need_music_access_subtitle">Разрешите доступ к аудиофайлам, чтобы приложение нашло ваши треки.</string>
+    <string name="need_music_access_picker_subtitle">Разрешите доступ к аудиофайлам, чтобы выбрать треки.</string>
+    <string name="empty_here_title">Здесь пусто</string>
+    <string name="empty_here_subtitle">В этой папке нет музыкальных файлов.</string>
+    <string name="cd_detect_bpm">Определить BPM</string>
+    <string name="calculating_bpm">считаю BPM…</string>
+    <string name="bpm_none">BPM –</string>
+    <string name="sort_name">Имя</string>
+    <string name="sort_title">Название</string>
+    <string name="sort_bpm">BPM</string>
+    <string name="reanalyze_title">Пересчитать BPM?</string>
+    <string name="reanalyze_folder_text">Все треки уже имеют BPM. Пересчитать BPM всех треков в этой папке заново?</string>
+    <string name="reanalyze_playlist_text">Все треки в этом плейлисте уже имеют BPM. Пересчитать BPM всех треков заново?</string>
+
+    <plurals name="track_count">
+        <item quantity="one">%1$d трек</item>
+        <item quantity="few">%1$d трека</item>
+        <item quantity="many">%1$d треков</item>
+        <item quantity="other">%1$d трека</item>
+    </plurals>
+
+    <!-- Плейлисты -->
+    <string name="my_playlists">Мои плейлисты</string>
+    <string name="playlists_empty_title">Плейлистов нет</string>
+    <string name="playlists_empty_subtitle">Создайте плейлист, чтобы собирать треки под настроение.</string>
+    <string name="create_playlist">Создать плейлист</string>
+    <string name="cd_rename">Переименовать</string>
+    <string name="cd_delete">Удалить</string>
+    <string name="rename_playlist">Переименовать плейлист</string>
+    <string name="playlist_name_label">Название плейлиста</string>
+    <string name="name_label">Название</string>
+    <string name="delete_playlist_title">Удалить плейлист</string>
+    <string name="delete_playlist_confirm">Удалить плейлист \"%1$s\"? Это действие нельзя отменить.</string>
+
+    <!-- Детали плейлиста -->
+    <string name="add_tracks">Добавить треки</string>
+    <string name="playlist_empty_title">Плейлист пуст</string>
+    <string name="playlist_empty_subtitle">Добавьте треки из своей библиотеки.</string>
+    <string name="cd_remove_from_playlist">Удалить из плейлиста</string>
+
+    <!-- Выбор треков -->
+    <string name="select_tracks">Выбрать треки</string>
+    <string name="select_all">Выбрать все</string>
+    <string name="deselect_all">Снять все</string>
+    <string name="mark_tracks">Отметьте треки</string>
+    <string name="selected_count">Выбрано: %1$d</string>
+    <string name="add_selected">Добавить (%1$d)</string>
+
+    <!-- Помощь -->
+    <string name="help_step_of">Шаг %1$d из %2$d</string>
+    <string name="help_finish">Закончить</string>
+    <string name="help_next">Далее</string>
+    <string name="help_header_title">Dwind Player</string>
+    <string name="help_header_text">Аудиоплеер, который умеет измерять темп музыки (BPM).</string>
+    <string name="help_tabs_title">Папки и плейлисты</string>
+    <string name="help_tabs_text">Переключение между папками устройства и плейлистами.</string>
+    <string name="help_menu_title">Меню</string>
+    <string name="help_menu_text">Настройки: измерение BPM, тема, стиль и справка.</string>
+    <string name="help_sort_name_title">Сортировка по имени</string>
+    <string name="help_sort_name_text">«Имя» — сортировка по имени файла.</string>
+    <string name="help_sort_title_title">Сортировка по названию</string>
+    <string name="help_sort_title_text">«Название» — сортировка по названию трека.</string>
+    <string name="help_sort_bpm_title">Сортировка по BPM</string>
+    <string name="help_sort_bpm_text">«BPM» — сортировка по темпу.</string>
+    <string name="help_playlist_item_title">Плейлисты</string>
+    <string name="help_playlist_item_text">Тап по плейлисту — открыть его; значки справа — переименовать и удалить.</string>
+    <string name="help_create_playlist_title">Создать плейлист</string>
+    <string name="help_create_playlist_text">Собирайте треки в плейлисты под настроение.</string>
+    <string name="help_add_tracks_title">Добавить треки</string>
+    <string name="help_add_tracks_text">Добавьте треки из библиотеки в этот плейлист.</string>
+    <string name="help_list_title">Список</string>
+    <string name="help_list_text_tracks">Тап по строке — воспроизведение. Цвет цифры BPM показывает уверенность определения.</string>
+    <string name="help_list_text_folders">Тап по папке — открыть её, тап по треку — воспроизведение.</string>
+    <string name="help_bpm_text_title">Цифра BPM</string>
+    <string name="help_bpm_text_text">Тап по цифре BPM — ручной ввод темпа и выбор стиля.</string>
+    <string name="help_bpm_detect_title">Определить BPM</string>
+    <string name="help_bpm_detect_text">Измеряет BPM только этого трека.</string>
+    <string name="help_bpm_button_title">Анализ BPM</string>
+    <string name="help_bpm_button_text">Измеряет BPM всех треков в текущей папке.</string>
+    <string name="help_playlist_bpm_text">Измеряет BPM всех треков плейлиста.</string>
+    <string name="help_player_title">Мини-плеер</string>
+    <string name="help_player_text">Управление воспроизведением и перемешивание треков.</string>
+    <string name="help_add_to_playlist_title">В плейлист</string>
+    <string name="help_add_to_playlist_text">Кнопка «+» добавляет текущий трек в плейлист.</string>
+    <string name="help_more_title">Что ещё умеет</string>
+    <string name="help_recap">Коротко обо всём: измерение BPM (всей папки, одного трека и вручную тапом), ручной ввод темпа и стиля, плейлисты, сортировка, настройки BPM и темы, мини-плеер с перемешиванием.</string>
+    <string name="help_recap_missing_prefix">\n\nНа этом экране видно не всё. Чтобы попробовать — </string>
+    <string name="help_missing_bpm">откройте папку или плейлист с треками — там работа с BPM</string>
+    <string name="help_missing_sort">в папке с треками есть сортировка по имени файла, названию трека и BPM</string>
+    <string name="help_missing_playlists">на вкладке «Плейлисты» создаются плейлисты и добавляются треки</string>
+    <string name="help_missing_player">включите трек — появится мини-плеер</string>
+</resources>

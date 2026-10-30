@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Tune
@@ -38,18 +39,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dwind.BuildConfig
+import com.dwind.R
 import com.dwind.settings.AppSettings
+import com.dwind.settings.LanguageMode
 import com.dwind.settings.SettingsState
 import com.dwind.settings.ThemeMode
 import kotlin.math.roundToInt
 
 /**
  * Правое меню-троеточие: измерение BPM (диапазон и порог автоопределения),
- * выбор темы, показ стиля, справка и «О программе».
+ * выбор темы и языка, показ стиля, справка и «О программе».
  *
  * @param iconTint цвет иконки; по умолчанию — как у содержимого (для шапки
  *   приложения передаётся белый, чтобы читалось поверх градиента).
@@ -62,16 +67,26 @@ fun AppOverflowMenu(
 ) {
     val settings by AppSettings.state.collectAsState()
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
     var showMeasurementDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAbout by remember { mutableStateOf(false) }
 
+    // Текущий язык интерфейса определяем по уже применённой локали контекста:
+    // это верно и для системного языка, и для ручного переключения.
+    val isRussian = context.resources.configuration.locales[0].language == "ru"
+    val languageItemLabel = if (isRussian) {
+        stringResource(R.string.language_switch_to_english)
+    } else {
+        stringResource(R.string.language_switch_to_russian)
+    }
+
     Box(modifier = modifier) {
         IconButton(onClick = { expanded = true }) {
             Icon(
                 Icons.Filled.MoreVert,
-                contentDescription = "Меню",
+                contentDescription = stringResource(R.string.menu_content_description),
                 tint = if (iconTint == Color.Unspecified) androidx.compose.material3.LocalContentColor.current else iconTint
             )
         }
@@ -81,20 +96,30 @@ fun AppOverflowMenu(
         ) {
             MenuItem(
                 icon = Icons.Filled.Tune,
-                text = "Измерение bpm"
+                text = stringResource(R.string.menu_bpm_measurement)
             ) {
                 expanded = false
                 showMeasurementDialog = true
             }
             MenuItem(
                 icon = Icons.Filled.DarkMode,
-                text = "Тема: ${themeLabel(settings.themeMode)}"
+                text = stringResource(R.string.menu_theme, themeLabel(settings.themeMode))
             ) {
                 expanded = false
                 showThemeDialog = true
             }
+            MenuItem(
+                icon = Icons.Filled.Language,
+                text = languageItemLabel
+            ) {
+                // Язык применяется мгновенно через LocalizedContent в дереве
+                // Compose, поэтому пересоздавать активность не нужно.
+                AppSettings.setLanguageMode(
+                    if (isRussian) LanguageMode.ENGLISH else LanguageMode.RUSSIAN
+                )
+            }
             DropdownMenuItem(
-                text = { Text("Отображать стиль") },
+                text = { Text(stringResource(R.string.menu_show_genre)) },
                 leadingIcon = { Icon(Icons.Filled.MusicNote, contentDescription = null) },
                 trailingIcon = {
                     Checkbox(
@@ -105,11 +130,11 @@ fun AppOverflowMenu(
                 onClick = { AppSettings.setShowGenre(!settings.showGenre) }
             )
             HorizontalDivider()
-            MenuItem(icon = Icons.AutoMirrored.Filled.HelpOutline, text = "Помощь") {
+            MenuItem(icon = Icons.AutoMirrored.Filled.HelpOutline, text = stringResource(R.string.menu_help)) {
                 expanded = false
                 onHelp()
             }
-            MenuItem(icon = Icons.Filled.Info, text = "О программе") {
+            MenuItem(icon = Icons.Filled.Info, text = stringResource(R.string.menu_about)) {
                 expanded = false
                 showAbout = true
             }
@@ -144,22 +169,22 @@ fun AppOverflowMenu(
     if (showAbout) {
         AlertDialog(
             onDismissRequest = { showAbout = false },
-            title = { Text("О программе") },
+            title = { Text(stringResource(R.string.about_title)) },
             text = {
                 Column {
-                    Text("Dwind Player", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.app_name), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "Версия ${BuildConfig.VERSION_NAME}",
+                        stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        "Дата сборки: ${BuildConfig.BUILD_DATE}",
+                        stringResource(R.string.about_build_date, BuildConfig.BUILD_DATE),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        "Разработчик: Андрей Кокорев",
+                        stringResource(R.string.about_developer),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(top = 8.dp)
                     )
@@ -172,7 +197,7 @@ fun AppOverflowMenu(
                             .clickable { uriHandler.openUri("https://github.com/Dangerwind") }
                     )
                     Text(
-                        "Приложение создано с использованием ИИ-агентов.",
+                        stringResource(R.string.about_ai_note),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 8.dp)
@@ -180,7 +205,7 @@ fun AppOverflowMenu(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showAbout = false }) { Text("Закрыть") }
+                TextButton(onClick = { showAbout = false }) { Text(stringResource(R.string.action_close)) }
             }
         )
     }
@@ -195,11 +220,14 @@ private fun MenuItem(icon: ImageVector, text: String, onClick: () -> Unit) {
     )
 }
 
-private fun themeLabel(mode: ThemeMode): String = when (mode) {
-    ThemeMode.SYSTEM -> "как в системе"
-    ThemeMode.LIGHT -> "светлая"
-    ThemeMode.DARK -> "тёмная"
-}
+@Composable
+private fun themeLabel(mode: ThemeMode): String = stringResource(
+    when (mode) {
+        ThemeMode.SYSTEM -> R.string.theme_label_system
+        ThemeMode.LIGHT -> R.string.theme_label_light
+        ThemeMode.DARK -> R.string.theme_label_dark
+    }
+)
 
 @Composable
 private fun ThemeDialog(
@@ -208,15 +236,15 @@ private fun ThemeDialog(
     onSave: (ThemeMode) -> Unit
 ) {
     val options = listOf(
-        ThemeMode.SYSTEM to "Как в системе",
-        ThemeMode.LIGHT to "Светлая",
-        ThemeMode.DARK to "Тёмная"
+        ThemeMode.SYSTEM to stringResource(R.string.theme_option_system),
+        ThemeMode.LIGHT to stringResource(R.string.theme_option_light),
+        ThemeMode.DARK to stringResource(R.string.theme_option_dark)
     )
     var selected by remember { mutableStateOf(current) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Тема оформления") },
+        title = { Text(stringResource(R.string.theme_dialog_title)) },
         text = {
             Column(Modifier.selectableGroup()) {
                 options.forEach { (mode, label) ->
@@ -245,10 +273,10 @@ private fun ThemeDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(selected) }) { Text("Сохранить") }
+            TextButton(onClick = { onSave(selected) }) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
 }
@@ -281,7 +309,7 @@ private fun BpmMeasurementDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Измерение BPM") },
+        title = { Text(stringResource(R.string.measurement_dialog_title)) },
         text = {
             Column {
                 // ---- Диапазон BPM --------------------------------------
@@ -290,12 +318,12 @@ private fun BpmMeasurementDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Диапазон BPM",
+                        stringResource(R.string.bpm_range_title),
                         style = MaterialTheme.typography.titleSmall,
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        "от $lo до $hi",
+                        stringResource(R.string.bpm_range_value, lo, hi),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
@@ -308,8 +336,7 @@ private fun BpmMeasurementDialog(
                     steps = (SettingsState.HARD_MAX - SettingsState.HARD_MIN - 1)
                 )
                 Text(
-                    "Сужение диапазона убирает ложное удвоение и ошибки распознавания. " +
-                        "Изменение не пересчитывает уже посчитанные треки — запустите BPM-анализ заново.",
+                    stringResource(R.string.bpm_range_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -320,12 +347,12 @@ private fun BpmMeasurementDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Порог «зелёного» BPM",
+                        stringResource(R.string.green_threshold_title),
                         style = MaterialTheme.typography.titleSmall,
                         modifier = Modifier.weight(1f)
                     )
                     Text(
-                        "$percent%",
+                        stringResource(R.string.percent_format, percent),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
@@ -338,18 +365,17 @@ private fun BpmMeasurementDialog(
                     steps = ((thresholdMax - thresholdMin).toInt() / 5) - 1
                 )
                 Text(
-                    "Если уверенность автоопределения не ниже порога — цифра BPM зелёная, " +
-                        "ниже порога — жёлто-коричневая. Ручной BPM всегда синий.",
+                    stringResource(R.string.green_threshold_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(lo, hi, percent) }) { Text("Сохранить") }
+            TextButton(onClick = { onSave(lo, hi, percent) }) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
 }

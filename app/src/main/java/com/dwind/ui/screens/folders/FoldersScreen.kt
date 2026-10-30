@@ -52,16 +52,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dwind.R
 import com.dwind.settings.AppSettings
 import com.dwind.ui.components.BpmEditDialog
 import com.dwind.ui.components.BpmEditTarget
 import com.dwind.ui.components.EmptyState
 import com.dwind.ui.components.IconBadge
+import com.dwind.ui.genreLabel
 import com.dwind.ui.help.helpTarget
 import com.dwind.ui.viewmodel.FoldersBrowserViewModel
 import com.dwind.ui.viewmodel.PlayerViewModel
@@ -108,7 +112,8 @@ fun FoldersScreen(
     }
 
     val showBack = state.currentPath.isNotEmpty() || state.pathStack.isNotEmpty()
-    val titleText = if (state.currentPath.isEmpty()) "Папки с музыкой"
+    val foldersTitle = stringResource(R.string.folders_title)
+    val titleText = if (state.currentPath.isEmpty()) foldersTitle
         else File(state.currentPath).name.ifEmpty { state.currentPath }
     val hasItems = state.files.isNotEmpty() || state.folders.isNotEmpty() ||
         (state.currentPath.isNotEmpty() && state.folders.isEmpty())
@@ -130,7 +135,7 @@ fun FoldersScreen(
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад",
+                            contentDescription = stringResource(R.string.action_back),
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -171,7 +176,7 @@ fun FoldersScreen(
             ) {
                 if (showBack) {
                     IconButton(onClick = { viewModel.goBack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 }
                 Text(
@@ -252,15 +257,15 @@ fun FoldersScreen(
         } else if (!state.hasPermission) {
             EmptyState(
                 icon = Icons.Filled.LibraryMusic,
-                title = "Нужен доступ к музыке",
-                subtitle = "Разрешите доступ к аудиофайлам, чтобы приложение нашло ваши треки.",
+                title = stringResource(R.string.need_music_access_title),
+                subtitle = stringResource(R.string.need_music_access_subtitle),
                 modifier = Modifier.fillMaxSize()
             )
         } else if (state.folders.isEmpty() && state.files.isEmpty()) {
             EmptyState(
                 icon = Icons.Filled.Folder,
-                title = "Здесь пусто",
-                subtitle = "В этой папке нет музыкальных файлов.",
+                title = stringResource(R.string.empty_here_title),
+                subtitle = stringResource(R.string.empty_here_subtitle),
                 modifier = Modifier.fillMaxSize()
             )
         } else {
@@ -291,9 +296,15 @@ fun FoldersScreen(
                                 container = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.14f)
                             )
                             Column(modifier = Modifier.weight(1f).padding(start = 14.dp)) {
-                                Text(text = folder.name, style = MaterialTheme.typography.titleSmall, maxLines = 1)
                                 Text(
-                                    text = "${folder.trackCount} треков",
+                                    text = if (folder.path == "/") stringResource(R.string.all_files) else folder.name,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = pluralStringResource(
+                                        R.plurals.track_count, folder.trackCount, folder.trackCount
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -392,7 +403,7 @@ fun FoldersScreen(
                                 if (compactWidth && settings.showGenre) {
                                     info?.genre?.let { g ->
                                         Text(
-                                            text = g,
+                                            text = genreLabel(g),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             maxLines = 1,
@@ -411,7 +422,7 @@ fun FoldersScreen(
                                         )
                                     } else {
                                         Text(
-                                            text = if (bpm != null) "${bpm.toInt()} BPM" else "BPM –",
+                                            text = if (bpm != null) "${bpm.toInt()} BPM" else stringResource(R.string.bpm_none),
                                             style = MaterialTheme.typography.labelMedium,
                                             color = if (bpm != null) bpmColor
                                             else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -427,7 +438,7 @@ fun FoldersScreen(
                                         ) {
                                             Icon(
                                                 Icons.Filled.Speed,
-                                                contentDescription = "Определить BPM",
+                                                contentDescription = stringResource(R.string.cd_detect_bpm),
                                                 modifier = Modifier.size(18.dp)
                                             )
                                         }
@@ -436,7 +447,7 @@ fun FoldersScreen(
                             } else {
                                 if (busy) {
                                     Text(
-                                        text = "считаю BPM…",
+                                        text = stringResource(R.string.calculating_bpm),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -453,7 +464,7 @@ fun FoldersScreen(
                                         if (settings.showGenre) {
                                             info?.genre?.let { g ->
                                                 Text(
-                                                    text = g,
+                                                    text = genreLabel(g),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                     maxLines = 1
@@ -463,7 +474,7 @@ fun FoldersScreen(
                                     }
                                 } else {
                                     Text(
-                                        text = "BPM –",
+                                        text = stringResource(R.string.bpm_none),
                                         style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier
@@ -482,7 +493,7 @@ fun FoldersScreen(
                                         onClick = { viewModel.detectBpm(item, force = bpm != null) },
                                         modifier = detectAnchor
                                     ) {
-                                        Icon(Icons.Filled.Speed, contentDescription = "Определить BPM")
+                                        Icon(Icons.Filled.Speed, contentDescription = stringResource(R.string.cd_detect_bpm))
                                     }
                                 }
                             }
@@ -512,16 +523,16 @@ fun FoldersScreen(
     if (showReanalyzeDialog) {
         AlertDialog(
             onDismissRequest = { showReanalyzeDialog = false },
-            title = { Text("Пересчитать BPM?") },
-            text = { Text("Все треки уже имеют BPM. Пересчитать BPM всех треков в этой папке заново?") },
+            title = { Text(stringResource(R.string.reanalyze_title)) },
+            text = { Text(stringResource(R.string.reanalyze_folder_text)) },
             confirmButton = {
                 TextButton(onClick = {
                     showReanalyzeDialog = false
                     viewModel.clearAndReanalyzeCurrentFolder()
-                }) { Text("Да") }
+                }) { Text(stringResource(R.string.action_yes)) }
             },
             dismissButton = {
-                TextButton(onClick = { showReanalyzeDialog = false }) { Text("Отмена") }
+                TextButton(onClick = { showReanalyzeDialog = false }) { Text(stringResource(R.string.action_cancel)) }
             }
         )
     }
@@ -560,9 +571,9 @@ private fun FolderSortChips(
     compact: Boolean = false,
     onSelect: (SortMode) -> Unit
 ) {
-    SortChip("Имя", sortMode == SortMode.FILE_NAME, sortOrder, compact, Modifier.helpTarget("sortByName")) { onSelect(SortMode.FILE_NAME) }
-    SortChip("Название", sortMode == SortMode.TRACK_TITLE, sortOrder, compact, Modifier.helpTarget("sortByTitle")) { onSelect(SortMode.TRACK_TITLE) }
-    SortChip("BPM", sortMode == SortMode.BPM, sortOrder, compact, Modifier.helpTarget("sortByBpm")) { onSelect(SortMode.BPM) }
+    SortChip(stringResource(R.string.sort_name), sortMode == SortMode.FILE_NAME, sortOrder, compact, Modifier.helpTarget("sortByName")) { onSelect(SortMode.FILE_NAME) }
+    SortChip(stringResource(R.string.sort_title), sortMode == SortMode.TRACK_TITLE, sortOrder, compact, Modifier.helpTarget("sortByTitle")) { onSelect(SortMode.TRACK_TITLE) }
+    SortChip(stringResource(R.string.sort_bpm), sortMode == SortMode.BPM, sortOrder, compact, Modifier.helpTarget("sortByBpm")) { onSelect(SortMode.BPM) }
 }
 
 /** Кнопка пакетного анализа BPM: прогресс с возможностью отмены либо запуск. */

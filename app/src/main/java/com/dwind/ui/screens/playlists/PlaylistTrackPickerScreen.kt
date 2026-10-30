@@ -45,10 +45,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dwind.R
 import com.dwind.data.model.AudioItem
 import com.dwind.ui.components.EmptyState
 import com.dwind.ui.components.IconBadge
@@ -129,12 +132,13 @@ fun PlaylistTrackPickerScreen(
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Назад",
+                    contentDescription = stringResource(R.string.action_back),
                     modifier = if (compactHeight) Modifier.size(20.dp) else Modifier
                 )
             }
             Text(
-                text = if (state.currentPath.isEmpty()) "Выбрать треки" else File(state.currentPath).name.ifEmpty { state.currentPath },
+                text = if (state.currentPath.isEmpty()) stringResource(R.string.select_tracks)
+                    else File(state.currentPath).name.ifEmpty { state.currentPath },
                 style = if (compactHeight) MaterialTheme.typography.titleMedium
                 else MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(start = 4.dp).weight(1f),
@@ -142,13 +146,13 @@ fun PlaylistTrackPickerScreen(
             )
             if (compactHeight && pickerHasItems) {
                 // В ландшафте чипы сортировки переносим в строку заголовка.
-                PickerSortChip("Имя", state.sortMode == SortMode.FILE_NAME, state.sortOrder, compact = true) {
+                PickerSortChip(stringResource(R.string.sort_name), state.sortMode == SortMode.FILE_NAME, state.sortOrder, compact = true) {
                     viewModel.setSortMode(SortMode.FILE_NAME)
                 }
-                PickerSortChip("Название", state.sortMode == SortMode.TRACK_TITLE, state.sortOrder, compact = true) {
+                PickerSortChip(stringResource(R.string.sort_title), state.sortMode == SortMode.TRACK_TITLE, state.sortOrder, compact = true) {
                     viewModel.setSortMode(SortMode.TRACK_TITLE)
                 }
-                PickerSortChip("BPM", state.sortMode == SortMode.BPM, state.sortOrder, compact = true) {
+                PickerSortChip(stringResource(R.string.sort_bpm), state.sortMode == SortMode.BPM, state.sortOrder, compact = true) {
                     viewModel.setSortMode(SortMode.BPM)
                 }
             }
@@ -162,7 +166,8 @@ fun PlaylistTrackPickerScreen(
                 }
             }) {
                 Text(
-                    text = if (state.files.isNotEmpty() && state.files.all { selectedItems.containsKey(it.id) }) "Снять все" else "Выбрать все",
+                    text = if (state.files.isNotEmpty() && state.files.all { selectedItems.containsKey(it.id) })
+                        stringResource(R.string.deselect_all) else stringResource(R.string.select_all),
                     style = if (compactHeight) MaterialTheme.typography.labelMedium else MaterialTheme.typography.labelLarge
                 )
             }
@@ -176,13 +181,13 @@ fun PlaylistTrackPickerScreen(
                     .padding(horizontal = 12.dp, vertical = 2.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                PickerSortChip("Имя", state.sortMode == SortMode.FILE_NAME, state.sortOrder) {
+                PickerSortChip(stringResource(R.string.sort_name), state.sortMode == SortMode.FILE_NAME, state.sortOrder) {
                     viewModel.setSortMode(SortMode.FILE_NAME)
                 }
-                PickerSortChip("Название", state.sortMode == SortMode.TRACK_TITLE, state.sortOrder) {
+                PickerSortChip(stringResource(R.string.sort_title), state.sortMode == SortMode.TRACK_TITLE, state.sortOrder) {
                     viewModel.setSortMode(SortMode.TRACK_TITLE)
                 }
-                PickerSortChip("BPM", state.sortMode == SortMode.BPM, state.sortOrder) {
+                PickerSortChip(stringResource(R.string.sort_bpm), state.sortMode == SortMode.BPM, state.sortOrder) {
                     viewModel.setSortMode(SortMode.BPM)
                 }
             }
@@ -200,15 +205,15 @@ fun PlaylistTrackPickerScreen(
         } else if (!state.hasPermission) {
             EmptyState(
                 icon = Icons.Filled.LibraryMusic,
-                title = "Нужен доступ к музыке",
-                subtitle = "Разрешите доступ к аудиофайлам, чтобы выбрать треки.",
+                title = stringResource(R.string.need_music_access_title),
+                subtitle = stringResource(R.string.need_music_access_picker_subtitle),
                 modifier = Modifier.weight(1f)
             )
         } else if (state.folders.isEmpty() && state.files.isEmpty()) {
             EmptyState(
                 icon = Icons.Filled.Folder,
-                title = "Здесь пусто",
-                subtitle = "В этой папке нет музыкальных файлов.",
+                title = stringResource(R.string.empty_here_title),
+                subtitle = stringResource(R.string.empty_here_subtitle),
                 modifier = Modifier.weight(1f)
             )
         } else {
@@ -239,9 +244,15 @@ fun PlaylistTrackPickerScreen(
                                 container = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.14f)
                             )
                             Column(modifier = Modifier.weight(1f).padding(start = 14.dp)) {
-                                Text(text = folder.name, style = MaterialTheme.typography.titleSmall, maxLines = 1)
                                 Text(
-                                    text = "${folder.trackCount} треков",
+                                    text = if (folder.path == "/") stringResource(R.string.all_files) else folder.name,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = pluralStringResource(
+                                        R.plurals.track_count, folder.trackCount, folder.trackCount
+                                    ),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -325,7 +336,8 @@ fun PlaylistTrackPickerScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = if (selectedItems.isEmpty()) "Отметьте треки" else "Выбрано: ${selectedItems.size}",
+                    text = if (selectedItems.isEmpty()) stringResource(R.string.mark_tracks)
+                        else stringResource(R.string.selected_count, selectedItems.size),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -333,7 +345,7 @@ fun PlaylistTrackPickerScreen(
                     onClick = { addSelectedAndClose() },
                     enabled = selectedItems.isNotEmpty()
                 ) {
-                    Text("Добавить (${selectedItems.size})")
+                    Text(stringResource(R.string.add_selected, selectedItems.size))
                 }
             }
         }

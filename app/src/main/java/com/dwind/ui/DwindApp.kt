@@ -36,9 +36,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dwind.R
 import com.dwind.ui.components.AppOverflowMenu
 import com.dwind.ui.components.MiniPlayer
 import com.dwind.ui.help.HelpGuide
@@ -57,7 +59,7 @@ fun DwindApp() {
     // rememberSaveable: выбранная вкладка сохраняется при повороте экрана и
     // пересоздании активности — пользователь остаётся там, где был.
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
-    val tabs = listOf("Папки", "Плейлисты")
+    val tabs = listOf(stringResource(R.string.tab_folders), stringResource(R.string.tab_playlists))
     val playerViewModel: PlayerViewModel = viewModel()
     val playerState by playerViewModel.uiState.collectAsState()
     val window = rememberWindowSizeInfo()
@@ -126,26 +128,22 @@ fun DwindApp() {
                 val activeSteps = buildHelpSteps(::has)
                 val missingNotes = buildList {
                     if (!has("bpmText") && !has("bpmDetect") && !has("bpmButton") && !has("playlistBpm")) {
-                        add("откройте папку или плейлист с треками — там работа с BPM")
+                        add(stringResource(R.string.help_missing_bpm))
                     }
                     if (!has("sortByName") && !has("playlistItem")) {
-                        add("в папке с треками есть сортировка по имени файла, названию трека и BPM")
+                        add(stringResource(R.string.help_missing_sort))
                     }
                     if (!has("createPlaylist") && !has("playlistItem") && !has("addTracks")) {
-                        add("на вкладке «Плейлисты» создаются плейлисты и добавляются треки")
+                        add(stringResource(R.string.help_missing_playlists))
                     }
                     if (!has("player")) {
-                        add("включите трек — появится мини-плеер")
+                        add(stringResource(R.string.help_missing_player))
                     }
                 }
                 val recap = buildString {
-                    append(
-                        "Коротко обо всём: измерение BPM (всей папки, одного трека и вручную тапом), " +
-                            "ручной ввод темпа и стиля, плейлисты, сортировка, настройки BPM и темы, " +
-                            "мини-плеер с перемешиванием."
-                    )
+                    append(stringResource(R.string.help_recap))
                     if (missingNotes.isNotEmpty()) {
-                        append("\n\nНа этом экране видно не всё. Чтобы попробовать — ")
+                        append(stringResource(R.string.help_recap_missing_prefix))
                         append(missingNotes.joinToString("; "))
                         append(".")
                     }
@@ -154,7 +152,7 @@ fun DwindApp() {
                 HelpGuide(
                     steps = activeSteps + HelpStep(
                         targetId = null,
-                        title = "Что ещё умеет",
+                        title = stringResource(R.string.help_more_title),
                         text = recap
                     ),
                     registry = helpRegistry,
@@ -170,58 +168,59 @@ fun DwindApp() {
  * элементы, которые реально есть в композиции (проверяется через [has]).
  * Так «Помощь» не указывает на то, чего на экране нет.
  */
+@Composable
 private fun buildHelpSteps(has: (String) -> Boolean): List<HelpStep> {
     val steps = mutableListOf<HelpStep>()
-    steps += HelpStep("header", "Dwind Player", "Аудиоплеер, который умеет измерять темп музыки (BPM).")
-    steps += HelpStep("tabs", "Папки и плейлисты", "Переключение между папками устройства и плейлистами.")
-    steps += HelpStep("menu", "Меню", "Настройки: измерение BPM, тема, стиль и справка.")
+    steps += HelpStep("header", stringResource(R.string.help_header_title), stringResource(R.string.help_header_text))
+    steps += HelpStep("tabs", stringResource(R.string.help_tabs_title), stringResource(R.string.help_tabs_text))
+    steps += HelpStep("menu", stringResource(R.string.help_menu_title), stringResource(R.string.help_menu_text))
 
     if (has("sortByName")) {
-        steps += HelpStep("sortByName", "Сортировка по имени", "«Имя» — сортировка по имени файла.")
+        steps += HelpStep("sortByName", stringResource(R.string.help_sort_name_title), stringResource(R.string.help_sort_name_text))
     }
     if (has("sortByTitle")) {
-        steps += HelpStep("sortByTitle", "Сортировка по названию", "«Название» — сортировка по названию трека.")
+        steps += HelpStep("sortByTitle", stringResource(R.string.help_sort_title_title), stringResource(R.string.help_sort_title_text))
     }
     if (has("sortByBpm")) {
-        steps += HelpStep("sortByBpm", "Сортировка по BPM", "«BPM» — сортировка по темпу.")
+        steps += HelpStep("sortByBpm", stringResource(R.string.help_sort_bpm_title), stringResource(R.string.help_sort_bpm_text))
     }
     if (has("playlistItem")) {
         steps += HelpStep(
-            "playlistItem", "Плейлисты",
-            "Тап по плейлисту — открыть его; значки справа — переименовать и удалить."
+            "playlistItem", stringResource(R.string.help_playlist_item_title),
+            stringResource(R.string.help_playlist_item_text)
         )
     }
     if (has("createPlaylist")) {
-        steps += HelpStep("createPlaylist", "Создать плейлист", "Собирайте треки в плейлисты под настроение.")
+        steps += HelpStep("createPlaylist", stringResource(R.string.help_create_playlist_title), stringResource(R.string.help_create_playlist_text))
     }
     if (has("addTracks")) {
-        steps += HelpStep("addTracks", "Добавить треки", "Добавьте треки из библиотеки в этот плейлист.")
+        steps += HelpStep("addTracks", stringResource(R.string.help_add_tracks_title), stringResource(R.string.help_add_tracks_text))
     }
     if (has("list")) {
         val text = if (has("bpmText") || has("bpmDetect")) {
-            "Тап по строке — воспроизведение. Цвет цифры BPM показывает уверенность определения."
+            stringResource(R.string.help_list_text_tracks)
         } else {
-            "Тап по папке — открыть её, тап по треку — воспроизведение."
+            stringResource(R.string.help_list_text_folders)
         }
-        steps += HelpStep("list", "Список", text)
+        steps += HelpStep("list", stringResource(R.string.help_list_title), text)
     }
     if (has("bpmText")) {
-        steps += HelpStep("bpmText", "Цифра BPM", "Тап по цифре BPM — ручной ввод темпа и выбор стиля.")
+        steps += HelpStep("bpmText", stringResource(R.string.help_bpm_text_title), stringResource(R.string.help_bpm_text_text))
     }
     if (has("bpmDetect")) {
-        steps += HelpStep("bpmDetect", "Определить BPM", "Измеряет BPM только этого трека.")
+        steps += HelpStep("bpmDetect", stringResource(R.string.help_bpm_detect_title), stringResource(R.string.help_bpm_detect_text))
     }
     if (has("bpmButton")) {
-        steps += HelpStep("bpmButton", "Анализ BPM", "Измеряет BPM всех треков в текущей папке.")
+        steps += HelpStep("bpmButton", stringResource(R.string.help_bpm_button_title), stringResource(R.string.help_bpm_button_text))
     }
     if (has("playlistBpm")) {
-        steps += HelpStep("playlistBpm", "Анализ BPM", "Измеряет BPM всех треков плейлиста.")
+        steps += HelpStep("playlistBpm", stringResource(R.string.help_bpm_button_title), stringResource(R.string.help_playlist_bpm_text))
     }
     if (has("player")) {
-        steps += HelpStep("player", "Мини-плеер", "Управление воспроизведением и перемешивание треков.")
+        steps += HelpStep("player", stringResource(R.string.help_player_title), stringResource(R.string.help_player_text))
     }
     if (has("addToPlaylist")) {
-        steps += HelpStep("addToPlaylist", "В плейлист", "Кнопка «+» добавляет текущий трек в плейлист.")
+        steps += HelpStep("addToPlaylist", stringResource(R.string.help_add_to_playlist_title), stringResource(R.string.help_add_to_playlist_text))
     }
     return steps
 }
@@ -256,7 +255,7 @@ private fun AppHeader(
             // чтобы шапка не съедала место у списка.
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Dwind Player",
+                    text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White,
                     maxLines = 1,
@@ -279,12 +278,12 @@ private fun AppHeader(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Dwind Player",
+                        text = stringResource(R.string.app_name),
                         style = MaterialTheme.typography.headlineSmall,
                         color = Color.White
                     )
                     Text(
-                        text = "Аудиоплеер для тех, кому важно знать темп музыки",
+                        text = stringResource(R.string.header_subtitle),
                         style = MaterialTheme.typography.labelMedium,
                         color = Color.White.copy(alpha = 0.78f)
                     )

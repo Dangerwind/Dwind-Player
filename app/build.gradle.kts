@@ -43,8 +43,8 @@ android {
         applicationId = "com.dwind"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         // Дата сборки (пересчитывается при каждой конфигурации Gradle).
         val buildDate = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
