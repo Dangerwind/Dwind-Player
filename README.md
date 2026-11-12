@@ -10,7 +10,7 @@
 
 **A player for the music on your phone that shows the tempo (BPM) of every song**
 
-Version **1.1.0**
+Version **1.5.6**
 
 </div>
 
@@ -29,7 +29,7 @@ You can also switch the language by hand from the menu.
 
 ## 📥 Download and install
 
-1. Tap the **`dwind-1.1.0-release.apk`** file in the
+1. Tap the **`dwind-1.5.6-release.apk`** file in the
    [**Releases**](https://github.com/Dangerwind/Dwind-Player/releases/latest) section.
 2. Download it to your phone.
 3. Open the downloaded file. Your phone may ask for permission to install apps from this
@@ -55,6 +55,8 @@ this is needed to show your songs.
 - Create, rename and delete playlists.
 - Add as many songs as you like.
 - You can measure the tempo of every song in a playlist at once.
+- Playlists and measured BPM values can be exported to a file and imported back — for example,
+  after reinstalling the app.
 
 ### 🥁 Tempo (BPM)
 - The app can detect a song's tempo on its own — with a single button.
@@ -63,19 +65,35 @@ this is needed to show your songs.
 - You can mark the song's style (rock, hip-hop, jazz, etc.).
 - The BPM number is color-coded: **green** — the app is confident, **yellow** — less confident,
   **blue** — you set the tempo yourself.
+- You can turn on a playback filter by tempo: only songs within the chosen BPM range play, the rest
+  are greyed out.
 
 ### ▶️ Player
 - Controls like a regular player: play, pause, next and previous track.
 - Seek through a song by dragging the progress bar.
 - There is **shuffle** and **repeat** (all songs or one song).
 - The **"+"** button adds the current song to a playlist right away.
+- **A–B section**: put two markers on the timeline while listening — the start and the end of a
+  fragment. Then play from the first marker or loop the fragment: it plays from A to B, pauses for
+  one second and starts again from A. Handy for practising a chorus or a combination.
 - Music keeps playing even if you leave the app.
+
+### 🎙️ Voice cues
+- During playback the music gently fades down and a voice reads a phrase.
+- Two modes: at a **fixed interval** or at **random moments** ("no more often than … — no less
+  often than …"). Both modes can work at the same time, and the phrases are read one after another.
+- Each mode has its own phrase list; you can listen to any phrase before saving.
+- Pause stops the countdown, and resuming continues from the same place.
+- The voice follows the phrase's language: Russian for Cyrillic text, English otherwise.
+- You can pick a separate voice for Russian and English.
+- The music volume during a phrase is adjustable (20% by default).
 
 ### 🎛️ Settings
 - Theme: follow the system, light or dark.
 - Language: follow the system, Russian or English.
 - Adjusting the tempo range and sensitivity helps when the app confuses "fast" and "slow" music.
 - You can show or hide the song's style in the list.
+- Voice cues: on/off, phrase lists, intervals, voice, and the music volume during a phrase.
 
 ### 📖 Help
 - Inside the app there is an interactive walkthrough that explains step by step what is where.
@@ -118,7 +136,7 @@ this is needed to show your songs.
 
 **Плеер для музыки с телефона, который показывает темп (BPM) каждой песни**
 
-Версия **1.1.0**
+Версия **1.5.6**
 
 </div>
 
@@ -137,7 +155,7 @@ this is needed to show your songs.
 
 ## 📥 Скачать и установить
 
-1. Нажмите на файл **`dwind-1.1.0-release.apk`** в разделе
+1. Нажмите на файл **`dwind-1.5.6-release.apk`** в разделе
    [**Releases**](https://github.com/Dangerwind/Dwind-Player/releases/latest).
 2. Скачайте его на телефон.
 3. Откройте скачанный файл. Телефон может спросить разрешение на установку приложений
@@ -165,6 +183,8 @@ this is needed to show your songs.
 - Создавайте, переименовывайте и удаляйте плейлисты.
 - Добавляйте в них сколько угодно песен.
 - Для плейлиста можно разом посчитать темп всех песен.
+- Плейлисты и измеренные значения BPM можно сохранить в файл и загрузить обратно — например,
+  после переустановки приложения.
 
 ### 🥁 Темп (BPM)
 - Приложение умеет само определить темп песни — одной кнопкой.
@@ -173,13 +193,28 @@ this is needed to show your songs.
 - Можно отметить стиль песни (рок, хип-хоп, джаз и т. д.).
 - Цифра темпа подсвечивается цветом: **зелёная** — приложение уверено в результате,
   **жёлтая** — уверено меньше, **синяя** — темп вы задали сами.
+- Можно включить фильтр воспроизведения по темпу: играют только песни с BPM в выбранном
+  диапазоне, остальные показаны серыми.
 
 ### ▶️ Плеер
 - Управление как в обычном плеере: играть, пауза, следующий и предыдущий трек.
 - Перематывайте песню, просто потянув за полоску прогресса.
 - Есть **перемешивание** песен и **повтор** (по кругу или одну песню).
 - Кнопкой **«+»** можно сразу добавить песню в плейлист.
+- **Фрагмент A–B**: поставьте на шкале времени две метки — начало и конец фрагмента. Затем можно
+  играть с первой метки или зациклить фрагмент: он играет от A до B, замирает на одну секунду и
+  снова начинает с A. Удобно отрабатывать припев или связку.
 - Музыка продолжает играть, даже если свернуть приложение.
+
+### 🎙️ Голосовые подсказки
+- Во время воспроизведения музыка плавно притихает, а голос читает фразу.
+- Два режима: через **равные промежутки** или в **случайные моменты** («не чаще … — не реже …»).
+  Оба режима могут работать одновременно, фразы озвучиваются по очереди.
+- У каждого режима свой список фраз; любую фразу можно прослушать перед сохранением.
+- Пауза останавливает отсчёт, а после продолжения он идёт с того же места.
+- Голос выбирается по языку фразы: для кириллицы — русский, иначе английский.
+- Можно выбрать отдельный голос для русского и английского.
+- Громкость музыки во время фразы настраивается (по умолчанию 20%).
 
 ### 🎛️ Настройки
 - Тема: как в системе, светлая или тёмная.
@@ -187,6 +222,7 @@ this is needed to show your songs.
 - Настройка диапазона темпа и чувствительности — помогает, когда приложение путает
   «быстрое» и «медленное» звучание.
 - Можно показать или скрыть стиль песни в списке.
+- Голосовые подсказки: включение, списки фраз, интервалы, голос, а также громкость музыки во время фразы.
 
 ### 📖 Помощь
 - Внутри приложения есть интерактивная подсказка, которая по шагам объясняет, что и где

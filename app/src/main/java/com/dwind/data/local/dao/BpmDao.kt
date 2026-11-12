@@ -12,6 +12,10 @@ interface BpmDao {
     @Query("SELECT * FROM bpm_library")
     fun getAll(): Flow<List<BpmEntity>>
 
+    /** Все BPM одним списком — для экспорта резервной копии. */
+    @Query("SELECT * FROM bpm_library")
+    suspend fun getAllOnce(): List<BpmEntity>
+
     @Query("SELECT * FROM bpm_library WHERE trackId = :trackId")
     suspend fun getByTrackId(trackId: String): BpmEntity?
 

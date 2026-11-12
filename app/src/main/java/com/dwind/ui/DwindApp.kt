@@ -50,6 +50,7 @@ import com.dwind.ui.help.LocalHelpTargets
 import com.dwind.ui.help.helpTarget
 import com.dwind.ui.screens.folders.FoldersScreen
 import com.dwind.ui.screens.playlists.PlaylistsScreen
+import com.dwind.ui.screens.voice.VoiceCueSettingsScreen
 import com.dwind.ui.theme.HeaderGradientEnd
 import com.dwind.ui.theme.HeaderGradientStart
 import com.dwind.ui.viewmodel.PlayerViewModel
@@ -79,7 +80,13 @@ fun DwindApp() {
     }
 
     var guideActive by remember { mutableStateOf(false) }
+    var voiceCueSettingsActive by remember { mutableStateOf(false) }
     val helpRegistry = remember { HelpTargetRegistry() }
+
+    if (voiceCueSettingsActive) {
+        VoiceCueSettingsScreen(onBack = { voiceCueSettingsActive = false })
+        return
+    }
 
     CompositionLocalProvider(LocalHelpTargets provides helpRegistry) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -92,7 +99,8 @@ fun DwindApp() {
                         tabs = tabs,
                         onTabSelected = { selectedTab = it },
                         compact = window.isShortHeight,
-                        onHelp = { guideActive = true }
+                        onHelp = { guideActive = true },
+                        onVoiceCues = { voiceCueSettingsActive = true }
                     )
                 }
             ) { innerPadding ->
@@ -102,11 +110,13 @@ fun DwindApp() {
                             modifier = Modifier.fillMaxSize(),
                             playerInset = playerInset,
                             compactWidth = compactPlayer,
-                            compactHeight = window.isShortHeight
+                            compactHeight = window.isShortHeight,
+                            onOpenVoiceCueSettings = { voiceCueSettingsActive = true }
                         )
                         1 -> PlaylistsScreen(
                             modifier = Modifier.fillMaxSize(),
-                            playerInset = playerInset
+                            playerInset = playerInset,
+                            onOpenVoiceCueSettings = { voiceCueSettingsActive = true }
                         )
                     }
                     if (showMiniPlayer) {
@@ -132,6 +142,9 @@ fun DwindApp() {
                     }
                     if (!has("sortByName") && !has("playlistItem")) {
                         add(stringResource(R.string.help_missing_sort))
+                    }
+                    if (!has("voiceCuesChip")) {
+                        add(stringResource(R.string.help_missing_voice_cues))
                     }
                     if (!has("createPlaylist") && !has("playlistItem") && !has("addTracks")) {
                         add(stringResource(R.string.help_missing_playlists))
@@ -184,6 +197,18 @@ private fun buildHelpSteps(has: (String) -> Boolean): List<HelpStep> {
     if (has("sortByBpm")) {
         steps += HelpStep("sortByBpm", stringResource(R.string.help_sort_bpm_title), stringResource(R.string.help_sort_bpm_text))
     }
+    if (has("bpmFilter")) {
+        steps += HelpStep(
+            "bpmFilter", stringResource(R.string.help_bpm_filter_title),
+            stringResource(R.string.help_bpm_filter_text)
+        )
+    }
+    if (has("voiceCuesChip")) {
+        steps += HelpStep(
+            "voiceCuesChip", stringResource(R.string.help_voice_cues_chip_title),
+            stringResource(R.string.help_voice_cues_chip_text)
+        )
+    }
     if (has("playlistItem")) {
         steps += HelpStep(
             "playlistItem", stringResource(R.string.help_playlist_item_title),
@@ -219,6 +244,18 @@ private fun buildHelpSteps(has: (String) -> Boolean): List<HelpStep> {
     if (has("player")) {
         steps += HelpStep("player", stringResource(R.string.help_player_title), stringResource(R.string.help_player_text))
     }
+    if (has("playerVoiceCues")) {
+        steps += HelpStep(
+            "playerVoiceCues", stringResource(R.string.help_player_voice_cues_title),
+            stringResource(R.string.help_player_voice_cues_text)
+        )
+    }
+    if (has("abSection")) {
+        steps += HelpStep(
+            "abSection", stringResource(R.string.help_ab_title),
+            stringResource(R.string.help_ab_text)
+        )
+    }
     if (has("addToPlaylist")) {
         steps += HelpStep("addToPlaylist", stringResource(R.string.help_add_to_playlist_title), stringResource(R.string.help_add_to_playlist_text))
     }
@@ -231,7 +268,8 @@ private fun AppHeader(
     tabs: List<String>,
     onTabSelected: (Int) -> Unit,
     compact: Boolean,
-    onHelp: () -> Unit
+    onHelp: () -> Unit,
+    onVoiceCues: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -271,7 +309,8 @@ private fun AppHeader(
                 AppOverflowMenu(
                     iconTint = Color.White,
                     modifier = Modifier.helpTarget("menu"),
-                    onHelp = onHelp
+                    onHelp = onHelp,
+                    onVoiceCues = onVoiceCues
                 )
             }
         } else {
@@ -291,7 +330,8 @@ private fun AppHeader(
                 AppOverflowMenu(
                     iconTint = Color.White,
                     modifier = Modifier.helpTarget("menu"),
-                    onHelp = onHelp
+                    onHelp = onHelp,
+                    onVoiceCues = onVoiceCues
                 )
             }
             Spacer(modifier = Modifier.height(14.dp))

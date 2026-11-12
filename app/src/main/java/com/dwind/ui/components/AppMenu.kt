@@ -1,5 +1,7 @@
 package com.dwind.ui.components
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +13,13 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
@@ -34,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,10 +52,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dwind.BuildConfig
 import com.dwind.R
+import com.dwind.data.backup.BackupFormatException
+import com.dwind.data.backup.BackupManager
 import com.dwind.settings.AppSettings
 import com.dwind.settings.LanguageMode
 import com.dwind.settings.SettingsState
 import com.dwind.settings.ThemeMode
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.roundToInt
 
 /**
@@ -63,15 +75,79 @@ import kotlin.math.roundToInt
 fun AppOverflowMenu(
     iconTint: Color = Color.Unspecified,
     modifier: Modifier = Modifier,
-    onHelp: () -> Unit = {}
+    onHelp: () -> Unit = {},
+    onVoiceCues: () -> Unit = {}
 ) {
     val settings by AppSettings.state.collectAsState()
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
     var showMeasurementDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAbout by remember { mutableStateOf(false) }
+    var showImportConfirm by remember { mutableStateOf(false) }
+    var backupMessage by remember { mutableStateOf<String?>(null) }
+
+    // Экспорт: системный пикер создаёт файл, доступ к хранилищу не нужен.
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                backupMessage = runCatching { BackupManager(context).exportTo(uri) }
+                    .fold(
+                        onSuccess = { summary ->
+                            context.getString(
+                                R.string.backup_export_success,
+                                summary.playlists,
+                                summary.tracks,
+                                summary.bpm
+                            )
+                        },
+                        onFailure = { error ->
+                            context.getString(
+                                R.string.backup_error,
+                                error.message ?: error.javaClass.simpleName
+                            )
+                        }
+                    )
+            }
+        }
+    }
+
+    // Импорт: выбираем JSON-файл, данные добавляются к текущим.
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                backupMessage = runCatching { BackupManager(context).importFrom(uri) }
+                    .fold(
+                        onSuccess = { summary ->
+                            context.getString(
+                                R.string.backup_import_success,
+                                summary.playlists,
+                                summary.tracks,
+                                summary.bpm,
+                                summary.skippedTracks,
+                                summary.skippedBpm
+                            )
+                        },
+                        onFailure = { error ->
+                            if (error is BackupFormatException) {
+                                context.getString(R.string.backup_error_format)
+                            } else {
+                                context.getString(
+                                    R.string.backup_error,
+                                    error.message ?: error.javaClass.simpleName
+                                )
+                            }
+                        }
+                    )
+            }
+        }
+    }
 
     // Текущий язык интерфейса определяем по уже применённой локали контекста:
     // это верно и для системного языка, и для ручного переключения.
@@ -102,6 +178,13 @@ fun AppOverflowMenu(
                 showMeasurementDialog = true
             }
             MenuItem(
+                icon = Icons.Filled.RecordVoiceOver,
+                text = voiceCueMenuLabel(settings)
+            ) {
+                expanded = false
+                onVoiceCues()
+            }
+            MenuItem(
                 icon = Icons.Filled.DarkMode,
                 text = stringResource(R.string.menu_theme, themeLabel(settings.themeMode))
             ) {
@@ -129,6 +212,24 @@ fun AppOverflowMenu(
                 },
                 onClick = { AppSettings.setShowGenre(!settings.showGenre) }
             )
+            HorizontalDivider()
+            MenuItem(
+                icon = Icons.Filled.FileUpload,
+                text = stringResource(R.string.menu_export_data)
+            ) {
+                expanded = false
+                val fileName = "dwind-backup-${
+                    SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+                }.json"
+                exportLauncher.launch(fileName)
+            }
+            MenuItem(
+                icon = Icons.Filled.FileDownload,
+                text = stringResource(R.string.menu_import_data)
+            ) {
+                expanded = false
+                showImportConfirm = true
+            }
             HorizontalDivider()
             MenuItem(icon = Icons.AutoMirrored.Filled.HelpOutline, text = stringResource(R.string.menu_help)) {
                 expanded = false
@@ -209,6 +310,40 @@ fun AppOverflowMenu(
             }
         )
     }
+
+    if (showImportConfirm) {
+        AlertDialog(
+            onDismissRequest = { showImportConfirm = false },
+            title = { Text(stringResource(R.string.backup_import_title)) },
+            text = { Text(stringResource(R.string.backup_import_confirm)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showImportConfirm = false
+                    importLauncher.launch(
+                        arrayOf("application/json", "text/plain", "application/octet-stream", "*/*")
+                    )
+                }) { Text(stringResource(R.string.action_import)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showImportConfirm = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
+
+    backupMessage?.let { message ->
+        AlertDialog(
+            onDismissRequest = { backupMessage = null },
+            title = { Text(stringResource(R.string.backup_title)) },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = { backupMessage = null }) {
+                    Text(stringResource(R.string.action_close))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -217,6 +352,22 @@ private fun MenuItem(icon: ImageVector, text: String, onClick: () -> Unit) {
         text = { Text(text) },
         leadingIcon = { Icon(icon, contentDescription = null) },
         onClick = onClick
+    )
+}
+
+/** Короткий статус голосовых подсказок для пункта меню. */
+@Composable
+private fun voiceCueMenuLabel(settings: SettingsState): String {
+    if (!settings.voiceCuesEnabled) return stringResource(R.string.menu_voice_cues_off)
+    val fixed = settings.voiceCueFixedEnabled && settings.voiceCueFixedLines.isNotEmpty()
+    val random = settings.voiceCueRandomEnabled && settings.voiceCueRandomLines.isNotEmpty()
+    return stringResource(
+        when {
+            fixed && random -> R.string.menu_voice_cues_both
+            fixed -> R.string.menu_voice_cues_fixed
+            random -> R.string.menu_voice_cues_random
+            else -> R.string.menu_voice_cues_on
+        }
     )
 }
 

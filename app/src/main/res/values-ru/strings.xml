@@ -12,7 +12,7 @@
     <string name="action_yes">Да</string>
 
     <!-- Шапка и вкладки -->
-    <string name="header_subtitle">Аудиоплеер для тех, кому важно знать темп музыки</string>
+    <string name="header_subtitle">Музыкальный плеер для танцевальных тренировок</string>
     <string name="tab_folders">Папки</string>
     <string name="tab_playlists">Плейлисты</string>
     <string name="menu_content_description">Меню</string>
@@ -26,6 +26,18 @@
     <string name="menu_show_genre">Отображать стиль</string>
     <string name="menu_help">Помощь</string>
     <string name="menu_about">О программе</string>
+    <string name="menu_export_data">Экспорт плейлистов и BPM</string>
+    <string name="menu_import_data">Импорт плейлистов и BPM</string>
+
+    <!-- Резервная копия -->
+    <string name="backup_title">Резервная копия</string>
+    <string name="action_import">Импортировать</string>
+    <string name="backup_import_title">Импорт данных</string>
+    <string name="backup_import_confirm">Плейлисты и значения BPM из файла будут добавлены. Текущие данные сохранятся.</string>
+    <string name="backup_export_success">Экспортировано: плейлистов — %1$d, треков — %2$d, значений BPM — %3$d.</string>
+    <string name="backup_import_success">Импортировано: плейлистов — %1$d, треков — %2$d, значений BPM — %3$d.\nПропущено: треков — %4$d, значений BPM — %5$d.</string>
+    <string name="backup_error">Не удалось обработать файл: %1$s</string>
+    <string name="backup_error_format">Этот файл не является резервной копией Dwind Player.</string>
 
     <!-- Переключение языка (всегда на целевом языке) -->
     <string name="language_switch_to_english">Switch to English</string>
@@ -46,6 +58,72 @@
     <string name="percent_format">%1$d%%</string>
     <string name="green_threshold_hint">Если уверенность автоопределения не ниже порога — цифра BPM зелёная, ниже порога — жёлто-коричневая. Ручной BPM всегда синий.</string>
 
+    <!-- Фильтр воспроизведения по BPM -->
+    <string name="bpm_filter_switch">Только в диапазоне BPM</string>
+    <string name="bpm_filter_range_short">%1$d–%2$d BPM</string>
+    <string name="bpm_filter_range_single">%1$d BPM</string>
+    <string name="bpm_filter_hint">Треки вне диапазона показаны серыми и не воспроизводятся.</string>
+    <string name="bpm_filter_need_bpm">Сначала определите BPM, чтобы включить фильтр</string>
+    <string name="bpm_filter_no_bpm">Нет BPM</string>
+    <string name="cd_bpm_filter_settings">Настроить диапазон BPM</string>
+
+    <!-- Голосовые подсказки -->
+    <string name="menu_voice_cues_off">Голосовые подсказки: выкл.</string>
+    <string name="menu_voice_cues_on">Голосовые подсказки: вкл.</string>
+    <string name="menu_voice_cues_fixed">Голосовые подсказки: равные интервалы</string>
+    <string name="menu_voice_cues_random">Голосовые подсказки: случайные задания</string>
+    <string name="menu_voice_cues_both">Голосовые подсказки: оба режима</string>
+    <string name="voice_cues_title">Голосовые подсказки</string>
+    <string name="voice_cues_master_title">Включить голосовые подсказки</string>
+    <string name="voice_cues_master_subtitle">Музыка притихает, а голос читает фразу.</string>
+    <string name="voice_cues_duck_title">Громкость музыки во время фразы</string>
+    <string name="voice_cues_duck_hint">Перед фразой музыка плавно притихает, после — возвращается.</string>
+    <string name="voice_cues_fixed_title">Равные интервалы</string>
+    <string name="voice_cues_fixed_subtitle">Например: «Поменяйтесь партнёрами».</string>
+    <string name="voice_cues_fixed_interval">Каждые %1$s</string>
+    <string name="voice_cues_random_title">Случайные задания</string>
+    <string name="voice_cues_random_subtitle">Например: «Не используйте правую руку».</string>
+    <string name="voice_cues_random_range">Не чаще %1$s — не реже %2$s</string>
+    <string name="voice_cues_phrases_count">Фразы (%1$d)</string>
+    <string name="voice_cues_no_phrases">Фраз пока нет. Добавьте хотя бы одну.</string>
+    <string name="voice_cues_add_phrase">Добавить фразу</string>
+    <string name="voice_cues_edit_phrase">Изменить фразу</string>
+    <string name="voice_cues_phrase_label">Фраза</string>
+    <string name="voice_cues_phrase_hint">Например: Поменяйтесь партнёрами</string>
+    <string name="voice_cues_preview">Прослушать</string>
+    <string name="voice_cues_need_phrase">Добавьте хотя бы одну фразу, чтобы включить режим</string>
+    <string name="voice_cues_tts_error">Голос недоступен. Установите данные синтеза речи в настройках Android.</string>
+    <string name="voice_cues_voice_title">Голос</string>
+    <string name="voice_cues_voice_subtitle">Выберите голос для каждого языка.</string>
+    <string name="voice_cues_voice_ru">Русский голос</string>
+    <string name="voice_cues_voice_en">Английский голос</string>
+    <string name="voice_cues_voice_auto">Автоматически</string>
+    <string name="voice_cues_voice_auto_hint">Лучший голос для языка фразы</string>
+    <string name="voice_cues_voice_pick_ru">Русский голос</string>
+    <string name="voice_cues_voice_pick_en">Английский голос</string>
+    <string name="voice_cues_voice_network">нужен интернет</string>
+    <string name="voice_cues_voice_none">Голоса не найдены. Установите данные синтеза речи в настройках Android.</string>
+    <string name="voice_cues_voice_loading">Загрузка голосов…</string>
+    <string name="voice_cues_sample_ru">Проверка голоса</string>
+    <string name="voice_cues_sample_en">Voice check</string>
+    <string name="voice_cues_delete_phrase">Удалить фразу</string>
+    <string name="voice_cues_edit_phrase_cd">Изменить фразу</string>
+    <string name="cd_voice_cues">Голосовые подсказки</string>
+    <string name="voice_cues_list_title">Голосовые подсказки</string>
+    <string name="voice_cues_chip_label">Подсказки</string>
+    <string name="voice_cues_summary_off">выкл.</string>
+    <string name="voice_cues_summary_on">вкл.</string>
+    <string name="voice_cues_summary_fixed">равные интервалы</string>
+    <string name="voice_cues_summary_random">случайные задания</string>
+    <string name="voice_cues_summary_both">оба режима</string>
+    <string name="voice_cues_need_phrase_short">Добавьте фразы в настройках голосовых подсказок</string>
+    <string name="cd_voice_cues_settings">Настройки голосовых подсказок</string>
+    <string name="voice_cues_interval_seconds">%1$d с</string>
+    <string name="voice_cues_interval_minutes">%1$d мин</string>
+    <string name="voice_cues_interval_min_sec">%1$d мин %2$d с</string>
+    <string name="voice_cues_help_title">Голосовые подсказки</string>
+    <string name="voice_cues_help_text">Включите голосовые подсказки, чтобы слышать фразы во время воспроизведения — через равные промежутки или в случайные моменты. Можно выбрать отдельный голос для русского и английского, настроить приглушение музыки и быстро переключать подсказки прямо из списка или мини-плеера.</string>
+
     <!-- О программе -->
     <string name="about_title">О программе</string>
     <string name="about_version">Версия %1$s</string>
@@ -62,6 +140,12 @@
     <string name="cd_play_pause">Играть/Пауза</string>
     <string name="cd_next">Следующий</string>
     <string name="cd_repeat">Повтор</string>
+    <string name="ab_chip_label">A–B</string>
+    <string name="cd_ab_marker_a">Метка A — тап ставит начало в текущей позиции, долгое нажатие переходит к ней</string>
+    <string name="cd_ab_marker_b">Метка B — тап ставит конец в текущей позиции, долгое нажатие переходит к ней</string>
+    <string name="cd_ab_play_from_a">Играть с метки A</string>
+    <string name="cd_ab_loop">Зациклить фрагмент A–B</string>
+    <string name="cd_ab_clear">Сбросить метки A и B</string>
 
     <!-- Tap-tempo -->
     <string name="tap_tempo_title">Tap tempo: %1$s</string>
@@ -149,11 +233,11 @@
     <string name="help_finish">Закончить</string>
     <string name="help_next">Далее</string>
     <string name="help_header_title">Dwind Player</string>
-    <string name="help_header_text">Аудиоплеер, который умеет измерять темп музыки (BPM).</string>
+    <string name="help_header_text">Музыкальный плеер для танцевальных тренировок, который умеет измерять темп музыки (BPM).</string>
     <string name="help_tabs_title">Папки и плейлисты</string>
     <string name="help_tabs_text">Переключение между папками устройства и плейлистами.</string>
     <string name="help_menu_title">Меню</string>
-    <string name="help_menu_text">Настройки: измерение BPM, тема, стиль и справка.</string>
+    <string name="help_menu_text">Настройки: измерение BPM, голосовые подсказки, тема, стиль, экспорт/импорт и справка.</string>
     <string name="help_sort_name_title">Сортировка по имени</string>
     <string name="help_sort_name_text">«Имя» — сортировка по имени файла.</string>
     <string name="help_sort_title_title">Сортировка по названию</string>
@@ -176,15 +260,24 @@
     <string name="help_bpm_button_title">Анализ BPM</string>
     <string name="help_bpm_button_text">Измеряет BPM всех треков в текущей папке.</string>
     <string name="help_playlist_bpm_text">Измеряет BPM всех треков плейлиста.</string>
+    <string name="help_bpm_filter_title">Фильтр по BPM</string>
+    <string name="help_bpm_filter_text">Включите, чтобы играть только треки с BPM в выбранном диапазоне. Остальные становятся серыми.</string>
+    <string name="help_voice_cues_chip_title">Голосовые подсказки</string>
+    <string name="help_voice_cues_chip_text">Тап включает и выключает подсказки. Долгое нажатие открывает настройки: интервалы, списки фраз, отдельный голос для русского и английского и громкость приглушения музыки.</string>
+    <string name="help_player_voice_cues_title">Кнопка подсказок</string>
+    <string name="help_player_voice_cues_text">Быстро включает и выключает подсказки прямо из мини-плеера во время воспроизведения.</string>
+    <string name="help_ab_title">Фрагмент A–B</string>
+    <string name="help_ab_text">Включите трек и нажмите «A–B» в мини-плеере — под шкалой откроется панель фрагмента. Тап по A запоминает начало в текущей позиции, тап по B — конец: на шкале появляются метки A и B, а выбранный отрезок подсвечивается. «▶A» играет с начала фрагмента. «⟲» зацикливает его: воспроизведение идёт от A до B, замирает на одну секунду и снова начинается с A. «✕» сбрасывает метки, а долгое нажатие на A или B переводит к этой метке. Метки относятся к текущему треку и сбрасываются при переключении на другой.</string>
     <string name="help_player_title">Мини-плеер</string>
-    <string name="help_player_text">Управление воспроизведением и перемешивание треков.</string>
+    <string name="help_player_text">Управление воспроизведением, перемешивание треков и фрагмент A–B.</string>
     <string name="help_add_to_playlist_title">В плейлист</string>
     <string name="help_add_to_playlist_text">Кнопка «+» добавляет текущий трек в плейлист.</string>
     <string name="help_more_title">Что ещё умеет</string>
-    <string name="help_recap">Коротко обо всём: измерение BPM (всей папки, одного трека и вручную тапом), ручной ввод темпа и стиля, плейлисты, сортировка, настройки BPM и темы, мини-плеер с перемешиванием.</string>
+    <string name="help_recap">Коротко обо всём: измерение BPM (всей папки, одного трека и вручную тапом), ручной ввод темпа и стиля, плейлисты, сортировка, настройки BPM и темы, фильтр воспроизведения по BPM, голосовые подсказки (кнопка в списке и в мини-плеере, выбор русского и английского голоса, равные и случайные интервалы), мини-плеер с перемешиванием, зацикливание фрагмента A–B, экспорт и импорт базы данных.</string>
     <string name="help_recap_missing_prefix">\n\nНа этом экране видно не всё. Чтобы попробовать — </string>
     <string name="help_missing_bpm">откройте папку или плейлист с треками — там работа с BPM</string>
     <string name="help_missing_sort">в папке с треками есть сортировка по имени файла, названию трека и BPM</string>
+    <string name="help_missing_voice_cues">в папке с треками или в плейлисте доступна кнопка «Подсказки» (долгое нажатие — полные настройки)</string>
     <string name="help_missing_playlists">на вкладке «Плейлисты» создаются плейлисты и добавляются треки</string>
-    <string name="help_missing_player">включите трек — появится мини-плеер</string>
+    <string name="help_missing_player">включите трек — появится мини-плеер с кнопкой «A–B» для зацикливания фрагмента</string>
 </resources>

@@ -12,7 +12,7 @@
     <string name="action_yes">Yes</string>
 
     <!-- Шапка и вкладки -->
-    <string name="header_subtitle">Audio player for those who care about the tempo of music</string>
+    <string name="header_subtitle">Music player for dance training</string>
     <string name="tab_folders">Folders</string>
     <string name="tab_playlists">Playlists</string>
     <string name="menu_content_description">Menu</string>
@@ -26,6 +26,18 @@
     <string name="menu_show_genre">Show style</string>
     <string name="menu_help">Help</string>
     <string name="menu_about">About</string>
+    <string name="menu_export_data">Export playlists and BPM</string>
+    <string name="menu_import_data">Import playlists and BPM</string>
+
+    <!-- Backup -->
+    <string name="backup_title">Backup</string>
+    <string name="action_import">Import</string>
+    <string name="backup_import_title">Import data</string>
+    <string name="backup_import_confirm">Playlists and BPM values from the file will be added. Existing data is kept.</string>
+    <string name="backup_export_success">Exported: playlists — %1$d, tracks — %2$d, BPM values — %3$d.</string>
+    <string name="backup_import_success">Imported: playlists — %1$d, tracks — %2$d, BPM values — %3$d.\nSkipped: tracks — %4$d, BPM values — %5$d.</string>
+    <string name="backup_error">Could not process the file: %1$s</string>
+    <string name="backup_error_format">This file is not a Dwind Player backup.</string>
 
     <!-- Переключение языка (всегда на целевом языке) -->
     <string name="language_switch_to_english">Switch to English</string>
@@ -46,6 +58,72 @@
     <string name="percent_format">%1$d%%</string>
     <string name="green_threshold_hint">If the auto-detection confidence is at or above the threshold, the BPM number is green; below it — yellow-brown. Manual BPM is always blue.</string>
 
+    <!-- Playback BPM filter -->
+    <string name="bpm_filter_switch">Only in BPM range</string>
+    <string name="bpm_filter_range_short">%1$d–%2$d BPM</string>
+    <string name="bpm_filter_range_single">%1$d BPM</string>
+    <string name="bpm_filter_hint">Tracks outside the range are greyed out and cannot be played.</string>
+    <string name="bpm_filter_need_bpm">Determine BPM first to use this filter</string>
+    <string name="bpm_filter_no_bpm">No BPM</string>
+    <string name="cd_bpm_filter_settings">Set BPM range</string>
+
+    <!-- Voice cues -->
+    <string name="menu_voice_cues_off">Voice cues: off</string>
+    <string name="menu_voice_cues_on">Voice cues: on</string>
+    <string name="menu_voice_cues_fixed">Voice cues: fixed interval</string>
+    <string name="menu_voice_cues_random">Voice cues: random prompts</string>
+    <string name="menu_voice_cues_both">Voice cues: both modes</string>
+    <string name="voice_cues_title">Voice cues</string>
+    <string name="voice_cues_master_title">Enable voice cues</string>
+    <string name="voice_cues_master_subtitle">Music fades down and a voice reads a phrase.</string>
+    <string name="voice_cues_duck_title">Music volume during a phrase</string>
+    <string name="voice_cues_duck_hint">The music fades down before the phrase and returns afterwards.</string>
+    <string name="voice_cues_fixed_title">Fixed interval</string>
+    <string name="voice_cues_fixed_subtitle">For example, “Change partners”.</string>
+    <string name="voice_cues_fixed_interval">Every %1$s</string>
+    <string name="voice_cues_random_title">Random prompts</string>
+    <string name="voice_cues_random_subtitle">For example, “Do not use your right hand”.</string>
+    <string name="voice_cues_random_range">No more often than %1$s — no less often than %2$s</string>
+    <string name="voice_cues_phrases_count">Phrases (%1$d)</string>
+    <string name="voice_cues_no_phrases">No phrases yet. Add at least one.</string>
+    <string name="voice_cues_add_phrase">Add phrase</string>
+    <string name="voice_cues_edit_phrase">Edit phrase</string>
+    <string name="voice_cues_phrase_label">Phrase</string>
+    <string name="voice_cues_phrase_hint">For example: Change partners</string>
+    <string name="voice_cues_preview">Listen</string>
+    <string name="voice_cues_need_phrase">Add at least one phrase to enable this mode</string>
+    <string name="voice_cues_tts_error">Voice is unavailable. Install speech data in Android settings.</string>
+    <string name="voice_cues_voice_title">Voice</string>
+    <string name="voice_cues_voice_subtitle">Choose a voice for each language.</string>
+    <string name="voice_cues_voice_ru">Russian voice</string>
+    <string name="voice_cues_voice_en">English voice</string>
+    <string name="voice_cues_voice_auto">Automatic</string>
+    <string name="voice_cues_voice_auto_hint">Best voice for the phrase language</string>
+    <string name="voice_cues_voice_pick_ru">Russian voice</string>
+    <string name="voice_cues_voice_pick_en">English voice</string>
+    <string name="voice_cues_voice_network">needs internet</string>
+    <string name="voice_cues_voice_none">No voices found. Install speech data in Android settings.</string>
+    <string name="voice_cues_voice_loading">Loading voices…</string>
+    <string name="voice_cues_sample_ru">Проверка голоса</string>
+    <string name="voice_cues_sample_en">Voice check</string>
+    <string name="voice_cues_delete_phrase">Delete phrase</string>
+    <string name="voice_cues_edit_phrase_cd">Edit phrase</string>
+    <string name="cd_voice_cues">Voice cues</string>
+    <string name="voice_cues_list_title">Voice cues</string>
+    <string name="voice_cues_chip_label">Cues</string>
+    <string name="voice_cues_summary_off">off</string>
+    <string name="voice_cues_summary_on">on</string>
+    <string name="voice_cues_summary_fixed">fixed interval</string>
+    <string name="voice_cues_summary_random">random</string>
+    <string name="voice_cues_summary_both">both modes</string>
+    <string name="voice_cues_need_phrase_short">Add phrases in the voice cue settings</string>
+    <string name="cd_voice_cues_settings">Voice cue settings</string>
+    <string name="voice_cues_interval_seconds">%1$d s</string>
+    <string name="voice_cues_interval_minutes">%1$d min</string>
+    <string name="voice_cues_interval_min_sec">%1$d min %2$d s</string>
+    <string name="voice_cues_help_title">Voice cues</string>
+    <string name="voice_cues_help_text">Turn on voice cues to hear phrases during playback — at a fixed interval or at random moments. You can pick separate Russian and English voices, set the ducking volume, and toggle cues quickly from the list or mini player.</string>
+
     <!-- О программе -->
     <string name="about_title">About</string>
     <string name="about_version">Version %1$s</string>
@@ -62,6 +140,12 @@
     <string name="cd_play_pause">Play/Pause</string>
     <string name="cd_next">Next</string>
     <string name="cd_repeat">Repeat</string>
+    <string name="ab_chip_label">A–B</string>
+    <string name="cd_ab_marker_a">Marker A — tap to set the start at the current position, long press to jump to it</string>
+    <string name="cd_ab_marker_b">Marker B — tap to set the end at the current position, long press to jump to it</string>
+    <string name="cd_ab_play_from_a">Play from marker A</string>
+    <string name="cd_ab_loop">Loop the A–B section</string>
+    <string name="cd_ab_clear">Clear markers A and B</string>
 
     <!-- Tap-tempo -->
     <string name="tap_tempo_title">Tap tempo: %1$s</string>
@@ -147,11 +231,11 @@
     <string name="help_finish">Finish</string>
     <string name="help_next">Next</string>
     <string name="help_header_title">Dwind Player</string>
-    <string name="help_header_text">An audio player that can measure the tempo of music (BPM).</string>
+    <string name="help_header_text">A music player for dance training that can measure the tempo of music (BPM).</string>
     <string name="help_tabs_title">Folders and playlists</string>
     <string name="help_tabs_text">Switch between device folders and playlists.</string>
     <string name="help_menu_title">Menu</string>
-    <string name="help_menu_text">Settings: BPM measurement, theme, style and help.</string>
+    <string name="help_menu_text">Settings: BPM measurement, voice cues, theme, style, export/import and help.</string>
     <string name="help_sort_name_title">Sort by name</string>
     <string name="help_sort_name_text">\"Name\" — sort by file name.</string>
     <string name="help_sort_title_title">Sort by title</string>
@@ -174,15 +258,24 @@
     <string name="help_bpm_button_title">BPM analysis</string>
     <string name="help_bpm_button_text">Measures the BPM of all tracks in the current folder.</string>
     <string name="help_playlist_bpm_text">Measures the BPM of all tracks in the playlist.</string>
+    <string name="help_bpm_filter_title">BPM filter</string>
+    <string name="help_bpm_filter_text">Turn it on to play only tracks whose BPM is within the chosen range. The rest are greyed out.</string>
+    <string name="help_voice_cues_chip_title">Voice cues</string>
+    <string name="help_voice_cues_chip_text">Tap to turn voice cues on/off. Long press opens settings: intervals, phrase lists, separate Russian and English voices, and music ducking volume.</string>
+    <string name="help_player_voice_cues_title">Voice cues button</string>
+    <string name="help_player_voice_cues_text">Quickly toggles voice cues right from the mini player without leaving playback.</string>
+    <string name="help_ab_title">Section A–B</string>
+    <string name="help_ab_text">Play a track and tap \"A–B\" in the mini player — the section panel opens under the time bar. Tap A at the start of the fragment and B at its end: the A and B badges appear on the time bar and the chosen section is highlighted. \"▶A\" plays from the start of the fragment. \"⟲\" loops it: playback goes from A to B, pauses for one second and starts again from A. \"✕\" clears the markers, and a long press on A or B jumps to that marker. Markers belong to the current track and reset when you switch tracks.</string>
     <string name="help_player_title">Mini player</string>
-    <string name="help_player_text">Playback control and track shuffle.</string>
+    <string name="help_player_text">Playback control, track shuffle and the A–B section.</string>
     <string name="help_add_to_playlist_title">To playlist</string>
     <string name="help_add_to_playlist_text">The \"+\" button adds the current track to a playlist.</string>
     <string name="help_more_title">What else it can do</string>
-    <string name="help_recap">In short: BPM measurement (whole folder, single track and manual tapping), manual tempo and style entry, playlists, sorting, BPM and theme settings, mini player with shuffle.</string>
+    <string name="help_recap">In short: BPM measurement (whole folder, single track and manual tapping), manual tempo and style entry, playlists, sorting, BPM and theme settings, playback BPM filter, voice cues (cue button in the list and mini player, separate Russian and English voice selection, fixed and random intervals), mini player with shuffle, A–B section looping, database export and import.</string>
     <string name="help_recap_missing_prefix">\n\nNot everything is visible on this screen. To try it — </string>
     <string name="help_missing_bpm">open a folder or playlist with tracks — that\'s where BPM works</string>
     <string name="help_missing_sort">in a folder with tracks there is sorting by file name, track title and BPM</string>
+    <string name="help_missing_voice_cues">in a folder or playlist with tracks you will find the \"Cues\" button (long press for settings)</string>
     <string name="help_missing_playlists">on the \"Playlists\" tab you can create playlists and add tracks</string>
-    <string name="help_missing_player">play a track — a mini player will appear</string>
+    <string name="help_missing_player">play a track — a mini player will appear, with the \"A–B\" button for looping a section</string>
 </resources>

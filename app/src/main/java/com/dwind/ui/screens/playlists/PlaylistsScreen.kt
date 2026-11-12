@@ -51,6 +51,7 @@ import com.dwind.ui.viewmodel.PlaylistsViewModel
 fun PlaylistsScreen(
     modifier: Modifier = Modifier,
     playerInset: Dp = 0.dp,
+    onOpenVoiceCueSettings: () -> Unit = {},
     viewModel: PlaylistsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -68,6 +69,7 @@ fun PlaylistsScreen(
             playlistId = selectedPlaylist.id,
             initialPlaylistName = selectedPlaylist.name,
             playerInset = playerInset,
+            onOpenVoiceCueSettings = onOpenVoiceCueSettings,
             onBack = {
                 selectedPlaylistId = null
             }

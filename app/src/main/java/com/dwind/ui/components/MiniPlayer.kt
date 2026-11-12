@@ -2,7 +2,10 @@ package com.dwind.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,17 +14,21 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RepeatOne
+import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
@@ -32,6 +39,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -47,14 +55,23 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.Player
 import com.dwind.R
 import com.dwind.settings.AppSettings
+import com.dwind.settings.SettingsState
 import com.dwind.ui.genreLabel
 import com.dwind.ui.help.helpTarget
 import com.dwind.ui.viewmodel.PlayerUiState
@@ -122,6 +139,20 @@ fun MiniPlayer(
     val shownFraction = if (isDragging) dragFraction else realFraction
     val shownPosition = (shownFraction * duration).toLong().coerceAtLeast(0L)
     val durationState = rememberUpdatedState(duration)
+
+    // Метки фрагмента в долях шкалы — для отрисовки поверх прогресса.
+    fun fractionOf(ms: Long?): Float? =
+        ms?.let { if (duration > 0) (it.toFloat() / duration.toFloat()).coerceIn(0f, 1f) else null }
+    val markerAFraction = fractionOf(uiState.markerA)
+    val markerBFraction = fractionOf(uiState.markerB)
+    val markerColor = MaterialTheme.colorScheme.tertiary
+    val markerTextColor = MaterialTheme.colorScheme.onTertiary
+    val segmentColor = if (uiState.abLoopEnabled) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+    } else {
+        markerColor.copy(alpha = 0.22f)
+    }
+    val textMeasurer = rememberTextMeasurer()
 
     Card(
         modifier = modifier
@@ -202,6 +233,48 @@ fun MiniPlayer(
                             cornerRadius = CornerRadius(trackHeight / 2f)
                         )
                     }
+                    // Подсветка выбранного фрагмента A–B.
+                    if (markerAFraction != null && markerBFraction != null &&
+                        markerBFraction > markerAFraction
+                    ) {
+                        val xa = startX + (endX - startX) * markerAFraction
+                        val xb = startX + (endX - startX) * markerBFraction
+                        val bandHeight = with(density) { 10.dp.toPx() }
+                        drawRoundRect(
+                            color = segmentColor,
+                            topLeft = Offset(xa, cy - bandHeight / 2f),
+                            size = Size((xb - xa).coerceAtLeast(0f), bandHeight),
+                            cornerRadius = CornerRadius(bandHeight / 2f)
+                        )
+                    }
+                    // Флажки меток с буквами A и B.
+                    fun drawMarkerBadge(fraction: Float, label: String) {
+                        val bx = startX + (endX - startX) * fraction
+                        val half = with(density) { 6.dp.toPx() }
+                        drawRoundRect(
+                            color = markerColor,
+                            topLeft = Offset(bx - half, cy - half),
+                            size = Size(half * 2f, half * 2f),
+                            cornerRadius = CornerRadius(with(density) { 3.dp.toPx() })
+                        )
+                        val layout = textMeasurer.measure(
+                            text = AnnotatedString(label),
+                            style = TextStyle(
+                                color = markerTextColor,
+                                fontSize = 8.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                        drawText(
+                            textLayoutResult = layout,
+                            topLeft = Offset(
+                                bx - layout.size.width / 2f,
+                                cy - layout.size.height / 2f
+                            )
+                        )
+                    }
+                    markerAFraction?.let { drawMarkerBadge(it, "A") }
+                    markerBFraction?.let { drawMarkerBadge(it, "B") }
                     drawCircle(color = barActiveColor, radius = if (isDragging) with(density) { 6.dp.toPx() } else with(density) { 4.dp.toPx() }, center = Offset(x, cy))
                 }
                 if (isDragging) {
@@ -214,6 +287,18 @@ fun MiniPlayer(
                     )
                 }
             }
+            if (uiState.abPanelExpanded) {
+                AbPanel(
+                    uiState = uiState,
+                    onSetA = { playerViewModel.setMarkerA() },
+                    onSetB = { playerViewModel.setMarkerB() },
+                    onJumpA = { playerViewModel.jumpToMarkerA() },
+                    onJumpB = { playerViewModel.jumpToMarkerB() },
+                    onPlayFromA = { playerViewModel.playFromMarkerA() },
+                    onToggleLoop = { playerViewModel.toggleAbLoop() },
+                    onClear = { playerViewModel.clearAbMarkers() }
+                )
+            }
             if (compact) {
                 // Узкий экран: название сверху на всю ширину, кнопки — отдельной строкой ниже.
                 Column(
@@ -223,7 +308,11 @@ fun MiniPlayer(
                 ) {
                     TrackTitleBlock(
                         uiState = uiState,
-                        showGenre = settings.showGenre,
+                        settings = settings,
+                        abExpanded = uiState.abPanelExpanded,
+                        onToggleAb = {
+                            playerViewModel.setAbPanelExpanded(!uiState.abPanelExpanded)
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(2.dp))
@@ -245,7 +334,11 @@ fun MiniPlayer(
                 ) {
                     TrackTitleBlock(
                         uiState = uiState,
-                        showGenre = settings.showGenre,
+                        settings = settings,
+                        abExpanded = uiState.abPanelExpanded,
+                        onToggleAb = {
+                            playerViewModel.setAbPanelExpanded(!uiState.abPanelExpanded)
+                        },
                         modifier = Modifier.weight(1f)
                     )
                     TransportControls(
@@ -264,9 +357,12 @@ fun MiniPlayer(
 @Composable
 private fun TrackTitleBlock(
     uiState: PlayerUiState,
-    showGenre: Boolean,
+    settings: SettingsState,
+    abExpanded: Boolean,
+    onToggleAb: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val showGenre = settings.showGenre
     Column(modifier = modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -289,6 +385,13 @@ private fun TrackTitleBlock(
                     modifier = Modifier.padding(start = 6.dp)
                 )
             }
+            VoiceCueQuickToggle(settings)
+            AbToggleChip(
+                active = uiState.markerA != null || uiState.markerB != null ||
+                    uiState.abLoopEnabled,
+                expanded = abExpanded,
+                onClick = onToggleAb
+            )
         }
         if (uiState.currentArtist.isNotBlank()) {
             Text(
@@ -309,6 +412,220 @@ private fun TrackTitleBlock(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+    }
+}
+
+/** Быстрое включение голосовых подсказок прямо из мини-плеера. */
+@Composable
+private fun VoiceCueQuickToggle(settings: SettingsState) {
+    val hasLines = settings.voiceCueFixedLines.isNotEmpty() ||
+        settings.voiceCueRandomLines.isNotEmpty()
+    IconButton(
+        onClick = { AppSettings.setVoiceCuesEnabled(!settings.voiceCuesEnabled) },
+        enabled = hasLines,
+        modifier = Modifier
+            .size(30.dp)
+            .helpTarget("playerVoiceCues")
+    ) {
+        Icon(
+            Icons.Filled.RecordVoiceOver,
+            contentDescription = stringResource(R.string.cd_voice_cues),
+            modifier = Modifier.size(18.dp),
+            tint = when {
+                settings.voiceCuesEnabled -> MaterialTheme.colorScheme.primary
+                hasLines -> MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f)
+                else -> MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.3f)
+            }
+        )
+    }
+}
+
+/**
+ * Компактная кнопка «A–B» в строке названия. Раскрывает панель фрагмента;
+ * залита цветом, когда метки заданы или включён цикл.
+ */
+@Composable
+private fun AbToggleChip(
+    active: Boolean,
+    expanded: Boolean,
+    onClick: () -> Unit
+) {
+    val highlighted = active || expanded
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        color = if (highlighted) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.10f),
+        contentColor = if (highlighted) MaterialTheme.colorScheme.onPrimary
+        else MaterialTheme.colorScheme.onPrimaryContainer,
+        border = if (highlighted) null else BorderStroke(
+            1.dp, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.25f)
+        ),
+        modifier = Modifier
+            .padding(start = 4.dp)
+            .height(26.dp)
+            .helpTarget("abSection")
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = 7.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.ab_chip_label),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/** Панель фрагмента: метки A/B, запуск с A, цикл и сброс. */
+@Composable
+private fun AbPanel(
+    uiState: PlayerUiState,
+    onSetA: () -> Unit,
+    onSetB: () -> Unit,
+    onJumpA: () -> Unit,
+    onJumpB: () -> Unit,
+    onPlayFromA: () -> Unit,
+    onToggleLoop: () -> Unit,
+    onClear: () -> Unit
+) {
+    val a = uiState.markerA
+    val b = uiState.markerB
+    val validSection = a != null && b != null && b - a >= 1_000L
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp, top = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        AbMarkerChip(
+            label = "A",
+            timeMs = a,
+            contentDescription = stringResource(R.string.cd_ab_marker_a),
+            onSet = onSetA,
+            onJump = onJumpA
+        )
+        AbMarkerChip(
+            label = "B",
+            timeMs = b,
+            contentDescription = stringResource(R.string.cd_ab_marker_b),
+            onSet = onSetB,
+            onJump = onJumpB
+        )
+        Spacer(Modifier.weight(1f))
+        AbActionChip(
+            icon = Icons.Filled.PlayArrow,
+            label = "A",
+            contentDescription = stringResource(R.string.cd_ab_play_from_a),
+            enabled = a != null,
+            onClick = onPlayFromA
+        )
+        AbActionChip(
+            icon = Icons.Filled.Repeat,
+            contentDescription = stringResource(R.string.cd_ab_loop),
+            enabled = validSection,
+            active = uiState.abLoopEnabled,
+            onClick = onToggleLoop
+        )
+        if (a != null || b != null) {
+            AbActionChip(
+                icon = Icons.Filled.Close,
+                contentDescription = stringResource(R.string.cd_ab_clear),
+                onClick = onClear
+            )
+        }
+    }
+}
+
+/** Чип метки: тап ставит метку в текущую позицию, долгое нажатие — переход к ней. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun AbMarkerChip(
+    label: String,
+    timeMs: Long?,
+    contentDescription: String,
+    onSet: () -> Unit,
+    onJump: () -> Unit
+) {
+    val set = timeMs != null
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        color = if (set) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.22f)
+        else MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.08f),
+        contentColor = if (set) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.65f),
+        modifier = Modifier
+            .height(30.dp)
+            .semantics { this.contentDescription = contentDescription }
+            .combinedClickable(onClick = onSet, onLongClick = onJump)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = if (timeMs != null) formatTime(timeMs) else "--:--",
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+    }
+}
+
+/** Компактная кнопка действия панели фрагмента. */
+@Composable
+private fun AbActionChip(
+    icon: ImageVector,
+    contentDescription: String,
+    label: String? = null,
+    enabled: Boolean = true,
+    active: Boolean = false,
+    onClick: () -> Unit
+) {
+    val contentColor = when {
+        !enabled -> MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.30f)
+        active -> MaterialTheme.colorScheme.onPrimary
+        else -> MaterialTheme.colorScheme.onPrimaryContainer
+    }
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(8.dp),
+        color = if (active) MaterialTheme.colorScheme.primary else Color.Transparent,
+        contentColor = contentColor,
+        border = if (active) null else BorderStroke(
+            1.dp, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.25f)
+        ),
+        modifier = Modifier.height(30.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = if (label == null) 8.dp else 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(16.dp)
+            )
+            if (label != null) {
+                Spacer(Modifier.width(2.dp))
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

@@ -18,6 +18,14 @@ interface PlaylistDao {
     @Query("SELECT * FROM playlists WHERE id = :playlistId")
     suspend fun getPlaylistById(playlistId: String): PlaylistEntity?
 
+    /** Все плейлисты одним списком — для экспорта резервной копии. */
+    @Query("SELECT * FROM playlists ORDER BY createdAt ASC")
+    suspend fun getAllPlaylistsOnce(): List<PlaylistEntity>
+
+    /** Все связи плейлист↔трек — для экспорта резервной копии. */
+    @Query("SELECT * FROM playlist_track_cross_ref")
+    suspend fun getAllCrossRefsOnce(): List<PlaylistTrackCrossRef>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPlaylist(playlist: PlaylistEntity)
 
@@ -32,6 +40,9 @@ interface PlaylistDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addTrackToPlaylist(crossRef: PlaylistTrackCrossRef)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addTracksToPlaylist(crossRefs: List<PlaylistTrackCrossRef>)
 
     @Query("SELECT * FROM playlist_track_cross_ref WHERE playlistId = :playlistId ORDER BY position ASC")
     fun getTracksInPlaylist(playlistId: String): Flow<List<PlaylistTrackCrossRef>>

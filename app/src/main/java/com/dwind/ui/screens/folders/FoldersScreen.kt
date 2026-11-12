@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -63,8 +64,10 @@ import com.dwind.R
 import com.dwind.settings.AppSettings
 import com.dwind.ui.components.BpmEditDialog
 import com.dwind.ui.components.BpmEditTarget
+import com.dwind.ui.components.BpmFilterSection
 import com.dwind.ui.components.EmptyState
 import com.dwind.ui.components.IconBadge
+import com.dwind.ui.components.VoiceCueChip
 import com.dwind.ui.genreLabel
 import com.dwind.ui.help.helpTarget
 import com.dwind.ui.viewmodel.FoldersBrowserViewModel
@@ -80,6 +83,7 @@ fun FoldersScreen(
     playerInset: Dp = 0.dp,
     compactWidth: Boolean = false,
     compactHeight: Boolean = false,
+    onOpenVoiceCueSettings: () -> Unit = {},
     viewModel: FoldersBrowserViewModel = viewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -118,6 +122,11 @@ fun FoldersScreen(
     val hasItems = state.files.isNotEmpty() || state.folders.isNotEmpty() ||
         (state.currentPath.isNotEmpty() && state.folders.isEmpty())
 
+    // Границы фильтра строятся по реальным BPM треков текущей папки.
+    val availableBpms = remember(state.files, state.bpmByTrackId) {
+        state.files.mapNotNull { state.bpmByTrackId[it.id.toString()]?.toInt() }
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         if (compactHeight) {
             // Ландшафт телефона: заголовок, фильтры и кнопка BPM — в одну невысокую строку.
@@ -148,6 +157,10 @@ fun FoldersScreen(
                 )
                 if (hasItems) {
                     FolderSortChips(state.sortMode, state.sortOrder, compact = true) { viewModel.setSortMode(it) }
+                    VoiceCueChip(
+                        modifier = Modifier.helpTarget("voiceCuesChip"),
+                        onOpenSettings = onOpenVoiceCueSettings
+                    )
                     FolderBpmButton(
                         running = state.bpmRunning,
                         done = state.bpmDone,
@@ -199,6 +212,10 @@ fun FoldersScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     FolderSortChips(state.sortMode, state.sortOrder) { viewModel.setSortMode(it) }
+                    VoiceCueChip(
+                        modifier = Modifier.helpTarget("voiceCuesChip"),
+                        onOpenSettings = onOpenVoiceCueSettings
+                    )
                     FolderBpmButton(
                         running = state.bpmRunning,
                         done = state.bpmDone,
@@ -225,6 +242,10 @@ fun FoldersScreen(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     FolderSortChips(state.sortMode, state.sortOrder) { viewModel.setSortMode(it) }
+                    VoiceCueChip(
+                        modifier = Modifier.helpTarget("voiceCuesChip"),
+                        onOpenSettings = onOpenVoiceCueSettings
+                    )
                     Spacer(modifier = Modifier.weight(1f))
                     FolderBpmButton(
                         running = state.bpmRunning,
@@ -244,6 +265,11 @@ fun FoldersScreen(
                     )
                 }
             }
+        }
+
+        // Фильтр воспроизведения по BPM — над списком треков.
+        if (state.files.isNotEmpty()) {
+            BpmFilterSection(availableBpms = availableBpms, compact = compactHeight)
         }
 
         if (state.isLoading) {
@@ -319,11 +345,15 @@ fun FoldersScreen(
                 }
                 items(state.files, key = { it.id }) { item ->
                     val isCurrent = playerState.currentTrackId == item.id.toString()
+                    val bpm = state.bpmByTrackId[item.id.toString()]
+                    // Трек вне выбранного диапазона BPM показываем серым и не даём нажать.
+                    val allowed = settings.isBpmAllowed(bpm)
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 12.dp, vertical = 4.dp)
-                            .clickable { playerViewModel.playTrack(item, state.files) },
+                            .alpha(if (allowed) 1f else 0.4f)
+                            .clickable(enabled = allowed) { playerViewModel.playTrack(item, state.files) },
                         shape = MaterialTheme.shapes.large,
                         colors = CardDefaults.cardColors(
                             containerColor = if (isCurrent) MaterialTheme.colorScheme.secondaryContainer
@@ -349,7 +379,6 @@ fun FoldersScreen(
                                 else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                                 size = if (compactWidth) 36 else 44
                             )
-                            val bpm = state.bpmByTrackId[item.id.toString()]
                             val info = state.bpmInfoByTrackId[item.id.toString()]
                             val busy = state.bpmBusyIds.contains(item.id.toString())
                             val isFirstRow = item.id == state.files.firstOrNull()?.id
@@ -360,19 +389,21 @@ fun FoldersScreen(
                             )
                             // Тап по BPM открывает ручной редактор и запускает воспроизведение.
                             val openBpmEditor: () -> Unit = {
-                                bpmWasPlaying = playerViewModel.isPlayingNow()
-                                if (playerState.currentTrackId != item.id.toString()) {
-                                    playerViewModel.playTrack(item, state.files)
-                                } else {
-                                    playerViewModel.ensurePlaying()
+                                if (allowed) {
+                                    bpmWasPlaying = playerViewModel.isPlayingNow()
+                                    if (playerState.currentTrackId != item.id.toString()) {
+                                        playerViewModel.playTrack(item, state.files)
+                                    } else {
+                                        playerViewModel.ensurePlaying()
+                                    }
+                                    bpmEditor = BpmEditTarget(
+                                        trackId = item.id.toString(),
+                                        uri = item.uri,
+                                        fileName = item.fileName,
+                                        title = item.fileName,
+                                        currentBpm = bpm
+                                    )
                                 }
-                                bpmEditor = BpmEditTarget(
-                                    trackId = item.id.toString(),
-                                    uri = item.uri,
-                                    fileName = item.fileName,
-                                    title = item.fileName,
-                                    currentBpm = bpm
-                                )
                             }
                             Column(
                                 modifier = Modifier
@@ -429,11 +460,12 @@ fun FoldersScreen(
                                             maxLines = 1,
                                             modifier = Modifier
                                                 .padding(horizontal = 2.dp)
-                                                .clickable { openBpmEditor() }
+                                                .clickable(enabled = allowed) { openBpmEditor() }
                                                 .then(bpmAnchor)
                                         )
                                         IconButton(
                                             onClick = { viewModel.detectBpm(item, force = bpm != null) },
+                                            enabled = allowed,
                                             modifier = Modifier.size(32.dp).then(detectAnchor)
                                         ) {
                                             Icon(
@@ -454,7 +486,9 @@ fun FoldersScreen(
                                 } else if (bpm != null) {
                                     Column(
                                         horizontalAlignment = Alignment.End,
-                                        modifier = Modifier.clickable { openBpmEditor() }.then(bpmAnchor)
+                                        modifier = Modifier
+                                            .clickable(enabled = allowed) { openBpmEditor() }
+                                            .then(bpmAnchor)
                                     ) {
                                         Text(
                                             text = "${bpm.toInt()} BPM",
@@ -479,7 +513,7 @@ fun FoldersScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier
                                             .padding(horizontal = 6.dp)
-                                            .clickable { openBpmEditor() }
+                                            .clickable(enabled = allowed) { openBpmEditor() }
                                             .then(bpmAnchor)
                                     )
                                 }
@@ -491,6 +525,7 @@ fun FoldersScreen(
                                 } else {
                                     IconButton(
                                         onClick = { viewModel.detectBpm(item, force = bpm != null) },
+                                        enabled = allowed,
                                         modifier = detectAnchor
                                     ) {
                                         Icon(Icons.Filled.Speed, contentDescription = stringResource(R.string.cd_detect_bpm))

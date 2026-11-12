@@ -45,6 +45,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -52,10 +53,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dwind.R
 import com.dwind.settings.AppSettings
 import com.dwind.ui.components.BpmEditTarget
+import com.dwind.ui.components.BpmFilterSection
+import com.dwind.ui.components.VoiceCueChip
 import com.dwind.ui.components.EmptyState
 import com.dwind.ui.components.IconBadge
 import com.dwind.ui.genreLabel
 import com.dwind.ui.help.helpTarget
+import com.dwind.ui.rememberWindowSizeInfo
 import com.dwind.ui.viewmodel.PlaylistDetailViewModel
 import com.dwind.ui.viewmodel.PlayerViewModel
 
@@ -64,6 +68,7 @@ fun PlaylistDetailScreen(
     playlistId: String,
     initialPlaylistName: String = "",
     playerInset: Dp = 0.dp,
+    onOpenVoiceCueSettings: () -> Unit = {},
     onBack: () -> Unit,
     viewModel: PlaylistDetailViewModel = viewModel()
 ) {
@@ -71,11 +76,17 @@ fun PlaylistDetailScreen(
     val playerViewModel: PlayerViewModel = viewModel()
     val playerState by playerViewModel.uiState.collectAsState()
     val settings by AppSettings.state.collectAsState()
+    val window = rememberWindowSizeInfo()
     var showTrackPicker by rememberSaveable { mutableStateOf(false) }
     var bpmEditor by remember { mutableStateOf<com.dwind.ui.components.BpmEditTarget?>(null) }
     var bpmWasPlaying by remember { mutableStateOf(false) }
     var showReanalyzeDialog by remember { mutableStateOf(false) }
     var currentDisplayName by remember(playlistId) { mutableStateOf(initialPlaylistName) }
+
+    // Границы фильтра строятся по реальным BPM треков этого плейлиста.
+    val availableBpms = remember(state.tracks, state.bpmByTrackId) {
+        state.tracks.mapNotNull { state.bpmByTrackId[it.id]?.toInt() }
+    }
     
     LaunchedEffect(playlistId) {
         viewModel.loadPlaylist(playlistId)
@@ -144,6 +155,10 @@ fun PlaylistDetailScreen(
                     maxLines = 1
                 )
                 if (state.tracks.isNotEmpty()) {
+                    VoiceCueChip(
+                        modifier = Modifier.helpTarget("voiceCuesChip"),
+                        onOpenSettings = onOpenVoiceCueSettings
+                    )
                     if (state.bpmRunning) {
                         Button(
                             onClick = { viewModel.cancelBpmAnalysis() },
@@ -180,6 +195,14 @@ fun PlaylistDetailScreen(
                 }
             }
             
+            // Фильтр воспроизведения по BPM — над списком треков плейлиста.
+            if (state.tracks.isNotEmpty()) {
+                BpmFilterSection(
+                    availableBpms = availableBpms,
+                    compact = window.isShortHeight
+                )
+            }
+
             if (state.tracks.isEmpty()) {
                 EmptyState(
                     icon = Icons.AutoMirrored.Filled.PlaylistPlay,
@@ -205,6 +228,9 @@ fun PlaylistDetailScreen(
                 ) {
                     items(state.tracks) { track ->
                         val isCurrent = playerState.currentTrackId == track.id
+                        val bpm = state.bpmByTrackId[track.id]
+                        // Трек вне выбранного диапазона BPM показываем серым и не даём нажать.
+                        val allowed = settings.isBpmAllowed(bpm)
                         val isFirstRow = track.id == state.tracks.firstOrNull()?.id
                         val bpmAnchor = if (isFirstRow) Modifier.helpTarget("bpmText") else Modifier
                         val detectAnchor = if (isFirstRow) Modifier.helpTarget("bpmDetect") else Modifier
@@ -212,7 +238,8 @@ fun PlaylistDetailScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 4.dp, vertical = 3.dp)
-                                .clickable { playerViewModel.playTrackList(track.id, state.tracks) },
+                                .alpha(if (allowed) 1f else 0.4f)
+                                .clickable(enabled = allowed) { playerViewModel.playTrackList(track.id, state.tracks) },
                             shape = MaterialTheme.shapes.large,
                             colors = CardDefaults.cardColors(
                                 containerColor = if (isCurrent) MaterialTheme.colorScheme.secondaryContainer
@@ -250,7 +277,6 @@ fun PlaylistDetailScreen(
                                         )
                                     }
                                 }
-                                val bpm = state.bpmByTrackId[track.id]
                                 val info = state.bpmInfoByTrackId[track.id]
                                 val busy = state.bpmBusyIds.contains(track.id)
                                 if (busy) {
@@ -267,21 +293,21 @@ fun PlaylistDetailScreen(
                                         horizontalAlignment = Alignment.End,
                                         modifier = Modifier
                                             .then(bpmAnchor)
-                                            .clickable {
-                                            bpmWasPlaying = playerViewModel.isPlayingNow()
-                                            if (!isCurrent) {
-                                                playerViewModel.playTrackList(track.id, state.tracks)
-                                            } else {
-                                                playerViewModel.ensurePlaying()
+                                            .clickable(enabled = allowed) {
+                                                bpmWasPlaying = playerViewModel.isPlayingNow()
+                                                if (!isCurrent) {
+                                                    playerViewModel.playTrackList(track.id, state.tracks)
+                                                } else {
+                                                    playerViewModel.ensurePlaying()
+                                                }
+                                                bpmEditor = BpmEditTarget(
+                                                    trackId = track.id,
+                                                    uri = track.uri,
+                                                    fileName = track.fileName,
+                                                    title = track.title ?: track.fileName,
+                                                    currentBpm = bpm
+                                                )
                                             }
-                                            bpmEditor = BpmEditTarget(
-                                                trackId = track.id,
-                                                uri = track.uri,
-                                                fileName = track.fileName,
-                                                title = track.title ?: track.fileName,
-                                                currentBpm = bpm
-                                            )
-                                        }
                                     ) {
                                         Text(
                                             text = "${bpm.toInt()} BPM",
@@ -306,21 +332,21 @@ fun PlaylistDetailScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier
                                             .then(bpmAnchor)
-                                            .clickable {
-                                            bpmWasPlaying = playerViewModel.isPlayingNow()
-                                            if (!isCurrent) {
-                                                playerViewModel.playTrackList(track.id, state.tracks)
-                                            } else {
-                                                playerViewModel.ensurePlaying()
+                                            .clickable(enabled = allowed) {
+                                                bpmWasPlaying = playerViewModel.isPlayingNow()
+                                                if (!isCurrent) {
+                                                    playerViewModel.playTrackList(track.id, state.tracks)
+                                                } else {
+                                                    playerViewModel.ensurePlaying()
+                                                }
+                                                bpmEditor = BpmEditTarget(
+                                                    trackId = track.id,
+                                                    uri = track.uri,
+                                                    fileName = track.fileName,
+                                                    title = track.title ?: track.fileName,
+                                                    currentBpm = null
+                                                )
                                             }
-                                            bpmEditor = BpmEditTarget(
-                                                trackId = track.id,
-                                                uri = track.uri,
-                                                fileName = track.fileName,
-                                                title = track.title ?: track.fileName,
-                                                currentBpm = null
-                                            )
-                                        }
                                     )
                                 }
                                 if (busy) {
@@ -328,6 +354,7 @@ fun PlaylistDetailScreen(
                                 } else {
                                     IconButton(
                                         onClick = { viewModel.detectBpm(track, force = bpm != null) },
+                                        enabled = allowed,
                                         modifier = detectAnchor
                                     ) {
                                         Icon(Icons.Filled.Speed, contentDescription = stringResource(R.string.cd_detect_bpm))

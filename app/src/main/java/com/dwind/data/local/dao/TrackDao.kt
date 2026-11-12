@@ -12,6 +12,10 @@ interface TrackDao {
     @Query("SELECT * FROM tracks")
     fun getAllTracks(): Flow<List<TrackEntity>>
 
+    /** Все треки одним списком — для экспорта резервной копии. */
+    @Query("SELECT * FROM tracks")
+    suspend fun getAllTracksOnce(): List<TrackEntity>
+
     @Query("SELECT * FROM tracks WHERE id = :id LIMIT 1")
     suspend fun getTrackById(id: String): TrackEntity?
 
