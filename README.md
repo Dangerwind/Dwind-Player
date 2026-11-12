@@ -10,7 +10,7 @@
 
 **A player for the music on your phone that shows the tempo (BPM) of every song**
 
-Version **1.5.6**
+Version **1.5.7**
 
 </div>
 
@@ -29,7 +29,7 @@ You can also switch the language by hand from the menu.
 
 ## 📥 Download and install
 
-1. Tap the **`dwind-1.5.6-release.apk`** file in the
+1. Tap the **`dwind-1.5.7-release.apk`** file in the
    [**Releases**](https://github.com/Dangerwind/Dwind-Player/releases/latest) section.
 2. Download it to your phone.
 3. Open the downloaded file. Your phone may ask for permission to install apps from this
@@ -136,7 +136,7 @@ this is needed to show your songs.
 
 **Плеер для музыки с телефона, который показывает темп (BPM) каждой песни**
 
-Версия **1.5.6**
+Версия **1.5.7**
 
 </div>
 
@@ -155,7 +155,7 @@ this is needed to show your songs.
 
 ## 📥 Скачать и установить
 
-1. Нажмите на файл **`dwind-1.5.6-release.apk`** в разделе
+1. Нажмите на файл **`dwind-1.5.7-release.apk`** в разделе
    [**Releases**](https://github.com/Dangerwind/Dwind-Player/releases/latest).
 2. Скачайте его на телефон.
 3. Откройте скачанный файл. Телефон может спросить разрешение на установку приложений

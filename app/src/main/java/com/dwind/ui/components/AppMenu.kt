@@ -197,6 +197,9 @@ fun AppOverflowMenu(
             ) {
                 // Язык применяется мгновенно через LocalizedContent в дереве
                 // Compose, поэтому пересоздавать активность не нужно.
+                // Меню закрываем: всплывающее окно держит собственный контекст
+                // и иначе осталось бы на прежнем языке до повторного открытия.
+                expanded = false
                 AppSettings.setLanguageMode(
                     if (isRussian) LanguageMode.ENGLISH else LanguageMode.RUSSIAN
                 )
