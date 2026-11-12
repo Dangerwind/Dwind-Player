@@ -247,7 +247,6 @@ this is needed to show your songs.
 
 - GitHub: [github.com/Dangerwind](https://github.com/Dangerwind)
 
----
 
 <div align="center">
 <sub>Dwind Player · плеер с измерением темпа</sub>
