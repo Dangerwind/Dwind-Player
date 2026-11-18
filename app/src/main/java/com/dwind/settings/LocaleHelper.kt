@@ -51,6 +51,30 @@ object LocaleHelper {
         return LocalizedContext(base, localized)
     }
 
+    /**
+     * Переводит ресурсы уже созданной активности на выбранный язык без пересоздания.
+     *
+     * Всплывающие окна Compose (меню, диалоги) живут в собственном окне и берут
+     * строки из ресурсов активности, а не из Compose-контекста. Обновление
+     * ресурсов на месте делает их сразу переведёнными: пользователю не нужно
+     * закрывать и заново открывать меню.
+     */
+    @Suppress("DEPRECATION")
+    fun applyToResources(base: Context, mode: LanguageMode) {
+        val language = when (mode) {
+            LanguageMode.RUSSIAN -> "ru"
+            LanguageMode.ENGLISH -> "en"
+            LanguageMode.SYSTEM -> return
+        }
+        val locale = Locale(language)
+        val resources = base.resources
+        val configuration = Configuration(resources.configuration).apply {
+            setLocale(locale)
+            setLayoutDirection(locale)
+        }
+        resources.updateConfiguration(configuration, resources.displayMetrics)
+    }
+
     /** Локаль, применённая к контексту (первая в списке). */
     fun localeOf(context: Context): Locale =
         context.resources.configuration.locales[0]

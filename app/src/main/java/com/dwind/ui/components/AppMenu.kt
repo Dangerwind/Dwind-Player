@@ -59,8 +59,10 @@ import com.dwind.data.backup.BackupFormatException
 import com.dwind.data.backup.BackupManager
 import com.dwind.settings.AppSettings
 import com.dwind.settings.LanguageMode
+import com.dwind.settings.LocaleHelper
 import com.dwind.settings.SettingsState
 import com.dwind.settings.ThemeMode
+import com.dwind.ui.LocalizedContent
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -173,78 +175,80 @@ fun AppOverflowMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            MenuItem(
-                icon = Icons.Filled.Tune,
-                text = stringResource(R.string.menu_bpm_measurement)
-            ) {
-                expanded = false
-                showMeasurementDialog = true
-            }
-            MenuItem(
-                icon = Icons.Filled.RecordVoiceOver,
-                text = voiceCueMenuLabel(settings)
-            ) {
-                expanded = false
-                onVoiceCues()
-            }
-            MenuItem(
-                icon = Icons.Filled.DarkMode,
-                text = stringResource(R.string.menu_theme, themeLabel(settings.themeMode))
-            ) {
-                expanded = false
-                showThemeDialog = true
-            }
-            MenuItem(
-                icon = Icons.Filled.Language,
-                text = languageItemLabel
-            ) {
-                // Язык применяется мгновенно через LocalizedContent в дереве
-                // Compose. Дополнительно пересоздаём активность: у всплывающих
-                // окон (меню, диалоги) собственный контекст окна, и без
-                // пересоздания они оставались бы на прежнем языке.
-                expanded = false
-                AppSettings.setLanguageMode(
-                    if (isRussian) LanguageMode.ENGLISH else LanguageMode.RUSSIAN
+            // Меню живёт в собственном окне и берёт строки из ресурсов
+            // активности, поэтому локаль подставляем прямо в него: при смене
+            // языка открытое меню перерисовывается сразу.
+            LocalizedContent(settings.languageMode) {
+                MenuItem(
+                    icon = Icons.Filled.Tune,
+                    text = stringResource(R.string.menu_bpm_measurement)
+                ) {
+                    expanded = false
+                    showMeasurementDialog = true
+                }
+                MenuItem(
+                    icon = Icons.Filled.RecordVoiceOver,
+                    text = voiceCueMenuLabel(settings)
+                ) {
+                    expanded = false
+                    onVoiceCues()
+                }
+                MenuItem(
+                    icon = Icons.Filled.DarkMode,
+                    text = stringResource(R.string.menu_theme, themeLabel(settings.themeMode))
+                ) {
+                    expanded = false
+                    showThemeDialog = true
+                }
+                MenuItem(
+                    icon = Icons.Filled.Language,
+                    text = languageItemLabel
+                ) {
+                    // Пункт не закрывает меню: текст переводится на месте, и язык
+                    // виден сразу. Ресурсы активности обновляем для диалогов:
+                    // они тоже берут строки из ресурсов активности.
+                    val mode = if (isRussian) LanguageMode.ENGLISH else LanguageMode.RUSSIAN
+                    AppSettings.setLanguageMode(mode)
+                    context.findActivity()?.let { LocaleHelper.applyToResources(it, mode) }
+                }
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.menu_show_genre)) },
+                    leadingIcon = { Icon(Icons.Filled.MusicNote, contentDescription = null) },
+                    trailingIcon = {
+                        Checkbox(
+                            checked = settings.showGenre,
+                            onCheckedChange = null
+                        )
+                    },
+                    onClick = { AppSettings.setShowGenre(!settings.showGenre) }
                 )
-                context.findActivity()?.recreate()
-            }
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.menu_show_genre)) },
-                leadingIcon = { Icon(Icons.Filled.MusicNote, contentDescription = null) },
-                trailingIcon = {
-                    Checkbox(
-                        checked = settings.showGenre,
-                        onCheckedChange = null
-                    )
-                },
-                onClick = { AppSettings.setShowGenre(!settings.showGenre) }
-            )
-            HorizontalDivider()
-            MenuItem(
-                icon = Icons.Filled.FileUpload,
-                text = stringResource(R.string.menu_export_data)
-            ) {
-                expanded = false
-                val fileName = "dwind-backup-${
-                    SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
-                }.json"
-                exportLauncher.launch(fileName)
-            }
-            MenuItem(
-                icon = Icons.Filled.FileDownload,
-                text = stringResource(R.string.menu_import_data)
-            ) {
-                expanded = false
-                showImportConfirm = true
-            }
-            HorizontalDivider()
-            MenuItem(icon = Icons.AutoMirrored.Filled.HelpOutline, text = stringResource(R.string.menu_help)) {
-                expanded = false
-                onHelp()
-            }
-            MenuItem(icon = Icons.Filled.Info, text = stringResource(R.string.menu_about)) {
-                expanded = false
-                showAbout = true
+                HorizontalDivider()
+                MenuItem(
+                    icon = Icons.Filled.FileUpload,
+                    text = stringResource(R.string.menu_export_data)
+                ) {
+                    expanded = false
+                    val fileName = "dwind-backup-${
+                        SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+                    }.json"
+                    exportLauncher.launch(fileName)
+                }
+                MenuItem(
+                    icon = Icons.Filled.FileDownload,
+                    text = stringResource(R.string.menu_import_data)
+                ) {
+                    expanded = false
+                    showImportConfirm = true
+                }
+                HorizontalDivider()
+                MenuItem(icon = Icons.AutoMirrored.Filled.HelpOutline, text = stringResource(R.string.menu_help)) {
+                    expanded = false
+                    onHelp()
+                }
+                MenuItem(icon = Icons.Filled.Info, text = stringResource(R.string.menu_about)) {
+                    expanded = false
+                    showAbout = true
+                }
             }
         }
     }
