@@ -40,6 +40,8 @@ data class BrowserState(
     val pathStack: List<String> = emptyList(),
     val isLoading: Boolean = false,
     val hasPermission: Boolean = false,
+    /** Пути накопителей, чтобы заголовок и корень показывали их названия. */
+    val volumePaths: Set<String> = emptySet(),
     val sortMode: SortMode = SortMode.FILE_NAME,
     val sortOrder: SortOrder = SortOrder.ASC,
     val bpmByTrackId: Map<String, Double> = emptyMap(),
@@ -190,6 +192,25 @@ class FoldersBrowserViewModel(app: Application, private val savedStateHandle: Sa
     private var allItems: List<AudioItem> = emptyList()
     private var currentFiles: List<AudioItem> = emptyList()
 
+    /** Все каталоги с музыкой, включая промежуточные, где файлов нет. */
+    private var directories: Set<String> = emptySet()
+
+    /** Прямые подкаталоги: родитель → список путей, уже отсортированный по имени. */
+    private var childIndex: Map<String, List<String>> = emptyMap()
+
+    /** Сколько файлов лежит непосредственно в каталоге. */
+    private var directCount: Map<String, Int> = emptyMap()
+
+    /** Сколько файлов лежит в каталоге и во всех вложенных. */
+    private var subtreeCount: Map<String, Int> = emptyMap()
+
+    /** Корни накопителей: внутренняя память, SD-карта и т. п. */
+    private var volumePaths: Set<String> = emptySet()
+
+    /** Первичная загрузка уже была — при возврате в приложение можно обновлять молча. */
+    private var loadedOnce = false
+    private var refreshJob: Job? = null
+
     init {
         val savedPath = savedStateHandle.get<String>("currentPath") ?: ""
         val savedStack = savedStateHandle.get<ArrayList<String>>("pathStack") ?: arrayListOf()
@@ -206,62 +227,200 @@ class FoldersBrowserViewModel(app: Application, private val savedStateHandle: Sa
     }
 
     fun setPermission(granted: Boolean) {
-        _state.value = _state.value.copy(hasPermission = granted)
-        if (granted && allItems.isEmpty()) loadRoot()
-        else if (granted && allItems.isNotEmpty()) {
-            if (_state.value.currentPath.isEmpty() && _state.value.pathStack.isEmpty()) {
-                buildRoot()
-            } else {
-                openFolderDirect(_state.value.currentPath)
-            }
+        if (!granted) {
+            _state.value = _state.value.copy(hasPermission = false)
+            return
         }
+        _state.value = _state.value.copy(hasPermission = true)
+        if (allItems.isEmpty() && !loadedOnce) loadRoot() else refresh()
     }
 
+    /** Первичная загрузка библиотеки — с индикатором. */
     fun loadRoot() {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true)
-            allItems = repo.getAllAudio()
-            // Сохраняем треки в Room, чтобы плейлисты могли делать JOIN и искать треки
-            val trackEntities = allItems.map { item ->
-                TrackEntity(
-                    id = item.id.toString(),
-                    uri = item.uri,
-                    fileName = item.fileName,
-                    title = item.title.ifBlank { null },
-                    artist = item.artist,
-                    durationMs = item.duration,
-                    folderPath = item.parentPath
-                )
-            }
-            db.trackDao().upsertTracks(trackEntities)
-            if (_state.value.currentPath.isEmpty() && _state.value.pathStack.isEmpty()) {
-                buildRoot()
-            } else {
-                openFolderDirect(_state.value.currentPath)
-            }
-            _state.value = _state.value.copy(isLoading = false)
+        if (refreshJob?.isActive == true) return
+        refreshJob = startLoad(showSpinner = true)
+    }
+
+    /**
+     * Молчаливое обновление: перечитывает MediaStore и перестраивает дерево,
+     * не прерывая воспроизведение и не показывая спиннер.
+     * Нужно, чтобы музыка, скопированная в другую папку, появлялась сразу.
+     */
+    fun refresh() {
+        if (!_state.value.hasPermission) return
+        if (refreshJob?.isActive == true) return
+        refreshJob = startLoad(showSpinner = false)
+    }
+
+    /** Обновление при возврате в приложение — только после первой загрузки. */
+    fun refreshIfNeeded() {
+        if (loadedOnce) refresh()
+    }
+
+    private fun startLoad(showSpinner: Boolean): Job = viewModelScope.launch {
+        if (showSpinner) _state.value = _state.value.copy(isLoading = true)
+        try {
+            val items = repo.getAllAudio()
+            allItems = items
+            storeTracks(items)
+            rebuildIndex()
+            restoreCurrentView()
+            loadedOnce = true
+        } finally {
+            if (showSpinner) _state.value = _state.value.copy(isLoading = false)
         }
     }
 
-    private fun buildRoot() {
-        val rootMap = mutableMapOf<String, MutableList<AudioItem>>()
+    /** Сохраняем треки в Room, чтобы плейлисты могли делать JOIN и искать треки. */
+    private suspend fun storeTracks(items: List<AudioItem>) {
+        if (items.isEmpty()) return
+        val trackEntities = items.map { item ->
+            TrackEntity(
+                id = item.id.toString(),
+                uri = item.uri,
+                fileName = item.fileName,
+                title = item.title.ifBlank { null },
+                artist = item.artist,
+                durationMs = item.duration,
+                folderPath = item.parentPath
+            )
+        }
+        db.trackDao().upsertTracks(trackEntities)
+    }
+
+    /**
+     * Строит дерево каталогов по путям файлов из MediaStore.
+     * Промежуточные папки без музыки тоже попадают в дерево — по ним можно ходить,
+     * как в обычном файловом менеджере.
+     */
+    private fun rebuildIndex() {
+        val dirs = LinkedHashSet<String>()
+        val volumes = LinkedHashSet<String>()
+        val direct = HashMap<String, Int>()
+
         for (item in allItems) {
             val parent = item.parentPath.ifEmpty { "/" }
-            rootMap.getOrPut(parent) { mutableListOf() }.add(item)
+            direct[parent] = (direct[parent] ?: 0) + 1
+            val volume = volumeRootOf(parent)
+            if (volume != null) volumes.add(volume)
+            var dir = parent
+            while (true) {
+                if (dir != "/") dirs.add(dir)
+                if (volume != null && dir == volume) break
+                val up = parentDirOf(dir) ?: break
+                // Корень файловой системы не показываем — на верхнем уровне
+                // выводим накопители или их каталоги.
+                if (up == "/") break
+                dir = up
+            }
         }
-        val folders = rootMap.keys.sorted().map { path ->
-            val name = if (path == "/") "Все файлы" else File(path).name.ifEmpty { path }
-            FolderNode(path = path, name = name, isDirectory = true, trackCount = rootMap[path]?.size ?: 0)
+        dirs.addAll(volumes)
+
+        // Счётчики: сначала прямые файлы, затем снизу вверх суммируем вложенные.
+        val subtree = HashMap<String, Int>()
+        for (dir in dirs) subtree[dir] = direct[dir] ?: 0
+        for (dir in dirs.sortedByDescending { it.count { c -> c == '/' } }) {
+            val up = parentDirOf(dir) ?: continue
+            if (up in dirs) subtree[up] = (subtree[up] ?: 0) + (subtree[dir] ?: 0)
         }
+
+        val children = HashMap<String, MutableList<String>>()
+        for (dir in dirs) {
+            // Накопители — корни дерева, а не вложенные каталоги /storage.
+            if (dir in volumes) continue
+            val up = parentDirOf(dir) ?: continue
+            if (up in dirs) children.getOrPut(up) { mutableListOf() }.add(dir)
+        }
+        for (list in children.values) list.sortBy { File(it).name.lowercase() }
+
+        directories = dirs
+        volumePaths = volumes
+        directCount = direct
+        subtreeCount = subtree
+        childIndex = children
+    }
+
+    /** Корень накопителя для пути из MediaStore (например, /storage/emulated/0). */
+    private fun volumeRootOf(path: String): String? {
+        if (!path.startsWith("/")) return null
+        val parts = path.split('/').filter { it.isNotEmpty() }
+        if (parts.size >= 3 && parts[0] == "storage" && parts[1] == "emulated") {
+            return "/storage/emulated/${parts[2]}"
+        }
+        if (parts.size >= 2 && parts[0] == "storage") {
+            return "/storage/${parts[1]}"
+        }
+        return null
+    }
+
+    private fun parentDirOf(path: String): String? {
+        if (path.isEmpty() || path == "/") return null
+        val trimmed = path.trimEnd('/')
+        val index = trimmed.lastIndexOf('/')
+        return when {
+            index < 0 -> null
+            index == 0 -> "/"
+            else -> trimmed.substring(0, index)
+        }
+    }
+
+    private fun canOpen(path: String): Boolean = path.isEmpty() || path in directories
+
+    private fun folderNode(path: String): FolderNode = FolderNode(
+        path = path,
+        name = if (path in volumePaths) "" else File(path).name.ifEmpty { path },
+        isDirectory = true,
+        trackCount = subtreeCount[path] ?: 0,
+        isVolume = path in volumePaths
+    )
+
+    private fun childFolders(path: String): List<FolderNode> =
+        childIndex[path].orEmpty().map { folderNode(it) }
+
+    private fun buildRoot() {
+        val volumes = volumePaths.sortedWith(
+            compareBy<String> { if (it.startsWith("/storage/emulated/")) 0 else 1 }.thenBy { it }
+        )
+        // Каталоги вне /storage (например, /sdcard у некоторых прошивок) — отдельные корни.
+        val detached = directories
+            .filter { it !in volumePaths && volumeRootOf(it) == null }
+            .filter { parentDirOf(it) !in directories }
+            .sorted()
+
+        val nodes = when {
+            volumes.isEmpty() -> emptyList()
+            // Один накопитель: сразу показываем его верхние папки, без лишнего шага.
+            volumes.size == 1 -> {
+                val volume = volumes.first()
+                val kids = childFolders(volume)
+                if ((directCount[volume] ?: 0) > 0) listOf(folderNode(volume)) + kids else kids
+            }
+            else -> volumes.map { folderNode(it) }
+        } + detached.map { folderNode(it) }
+
         currentFiles = emptyList()
         _state.value = _state.value.copy(
             currentPath = "",
-            folders = folders,
+            folders = nodes,
             files = emptyList(),
-            pathStack = emptyList()
+            pathStack = emptyList(),
+            volumePaths = volumePaths
         )
         savedStateHandle["currentPath"] = ""
         savedStateHandle["pathStack"] = ArrayList<String>()
+    }
+
+    /** Возвращает вид к сохранённому пути, если он ещё существует, иначе к корню. */
+    private fun restoreCurrentView() {
+        val path = _state.value.currentPath
+        if (!canOpen(path) || path.isEmpty()) {
+            buildRoot()
+            return
+        }
+        val stack = _state.value.pathStack.filter { canOpen(it) }
+        _state.value = _state.value.copy(pathStack = stack)
+        savedStateHandle["pathStack"] = ArrayList(stack)
+        openFolderDirect(path)
     }
 
     fun openFolder(path: String) {
@@ -273,16 +432,22 @@ class FoldersBrowserViewModel(app: Application, private val savedStateHandle: Sa
     }
 
     fun goBack(): Boolean {
-        if (_state.value.pathStack.isEmpty()) {
+        val stack = _state.value.pathStack
+        if (stack.isEmpty()) {
             buildRoot()
             return true
         }
-        val prev = _state.value.pathStack.last()
-        val newStack = _state.value.pathStack.dropLast(1)
+        val prev = stack.last()
+        val newStack = stack.dropLast(1)
         if (prev.isEmpty()) {
             buildRoot()
             _state.value = _state.value.copy(pathStack = newStack)
             savedStateHandle["pathStack"] = ArrayList(newStack)
+            return true
+        }
+        if (!canOpen(prev)) {
+            // Папка исчезла, пока приложение было свёрнуто — показываем корень.
+            buildRoot()
             return true
         }
         _state.value = _state.value.copy(pathStack = newStack)
@@ -291,25 +456,20 @@ class FoldersBrowserViewModel(app: Application, private val savedStateHandle: Sa
         savedStateHandle["pathStack"] = ArrayList(newStack)
         return true
     }
-    
+
     private fun openFolderDirect(path: String) {
-        val folderItems = allItems.filter { it.parentPath == path }
-        val subfolders = allItems
-            .filter { it.parentPath.startsWith("$path/") && it.parentPath.count { c -> c == '/' } == path.count { c -> c == '/' } + 1 }
-            .map { it.parentPath }
-            .toSet()
-            .sorted()
-            .map { sp ->
-                val name = File(sp).name
-                val count = allItems.count { it.parentPath == sp }
-                FolderNode(path = sp, name = name, isDirectory = true, trackCount = count)
-            }
+        if (!canOpen(path) || path.isEmpty()) {
+            buildRoot()
+            return
+        }
+        val folderItems = allItems.filter { it.parentPath.ifEmpty { "/" } == path }
         currentFiles = folderItems
         val sorted = applySort(folderItems, _state.value.sortMode, _state.value.sortOrder)
         _state.value = _state.value.copy(
             currentPath = path,
-            folders = subfolders,
-            files = sorted
+            folders = childFolders(path),
+            files = sorted,
+            volumePaths = volumePaths
         )
     }
     

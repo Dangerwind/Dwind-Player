@@ -10,7 +10,7 @@
 
 **A player for the music on your phone that shows the tempo (BPM) of every song**
 
-Version **1.5.9**
+Version **1.6.0**
 
 </div>
 
@@ -29,7 +29,7 @@ You can also switch the language by hand from the menu.
 
 ## 📥 Download and install
 
-1. Tap the **`dwind-1.5.9-release.apk`** file in the
+1. Tap the **`dwind-1.6.0-release.apk`** file in the
    [**Releases**](https://github.com/Dangerwind/Dwind-Player/releases/latest) section.
 2. Download it to your phone.
 3. Open the downloaded file. Your phone may ask for permission to install apps from this
@@ -49,6 +49,10 @@ this is needed to show your songs.
 ### 🗂️ Music from your phone, by folders
 - The app shows the music already stored on your phone — nothing needs to be moved or uploaded.
 - You can browse folders like in a file manager and go back.
+- Folders keep their real nesting: you can go inside folder after folder, even if a folder
+  only contains other folders.
+- If you copy new music into a folder and return to the app, the new folder appears right away —
+  no restart needed.
 - The list can be sorted by file name, song title or tempo — both ascending and descending.
 
 ### 📃 Playlists
@@ -136,7 +140,7 @@ this is needed to show your songs.
 
 **Плеер для музыки с телефона, который показывает темп (BPM) каждой песни**
 
-Версия **1.5.9**
+Версия **1.6.0**
 
 </div>
 
@@ -155,7 +159,7 @@ this is needed to show your songs.
 
 ## 📥 Скачать и установить
 
-1. Нажмите на файл **`dwind-1.5.9-release.apk`** в разделе
+1. Нажмите на файл **`dwind-1.6.0-release.apk`** в разделе
    [**Releases**](https://github.com/Dangerwind/Dwind-Player/releases/latest).
 2. Скачайте его на телефон.
 3. Откройте скачанный файл. Телефон может спросить разрешение на установку приложений
@@ -176,6 +180,10 @@ this is needed to show your songs.
 - Приложение показывает музыку, которая уже есть в памяти телефона — ничего не нужно
   переносить или загружать.
 - Можно ходить по папкам, как в файловом менеджере, и возвращаться назад.
+- Папки сохраняют настоящую вложенность: можно заходить из папки в папку, даже если
+  в самой папке лежат только другие папки.
+- Если скопировать новую музыку в папку и вернуться в приложение, новая папка появится
+  сразу — перезапускать приложение не нужно.
 - Список можно упорядочить по имени файла, названию песни или темпу — и по возрастанию,
   и по убыванию.
 

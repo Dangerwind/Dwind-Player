@@ -43,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,12 +54,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dwind.R
 import com.dwind.settings.AppSettings
@@ -68,13 +72,14 @@ import com.dwind.ui.components.BpmFilterSection
 import com.dwind.ui.components.EmptyState
 import com.dwind.ui.components.IconBadge
 import com.dwind.ui.components.VoiceCueChip
+import com.dwind.ui.components.folderLabel
+import com.dwind.ui.components.folderPathLabel
 import com.dwind.ui.genreLabel
 import com.dwind.ui.help.helpTarget
 import com.dwind.ui.viewmodel.FoldersBrowserViewModel
 import com.dwind.ui.viewmodel.PlayerViewModel
 import com.dwind.ui.viewmodel.SortMode
 import com.dwind.ui.viewmodel.SortOrder
-import java.io.File
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -115,10 +120,20 @@ fun FoldersScreen(
         }
     }
 
+    // Возврат в приложение: тихо перечитываем библиотеку, чтобы музыка,
+    // скопированная в другую папку, сразу появилась в списке.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshIfNeeded()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     val showBack = state.currentPath.isNotEmpty() || state.pathStack.isNotEmpty()
     val foldersTitle = stringResource(R.string.folders_title)
-    val titleText = if (state.currentPath.isEmpty()) foldersTitle
-        else File(state.currentPath).name.ifEmpty { state.currentPath }
+    val titleText = folderPathLabel(state.currentPath, state.volumePaths, foldersTitle)
     val hasItems = state.files.isNotEmpty() || state.folders.isNotEmpty() ||
         (state.currentPath.isNotEmpty() && state.folders.isEmpty())
 
@@ -323,7 +338,7 @@ fun FoldersScreen(
                             )
                             Column(modifier = Modifier.weight(1f).padding(start = 14.dp)) {
                                 Text(
-                                    text = if (folder.path == "/") stringResource(R.string.all_files) else folder.name,
+                                    text = folderLabel(folder),
                                     style = MaterialTheme.typography.titleSmall,
                                     maxLines = 1
                                 )

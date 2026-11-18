@@ -179,6 +179,8 @@
     <!-- Папки -->
     <string name="folders_title">Папки с музыкой</string>
     <string name="all_files">Все файлы</string>
+    <string name="storage_internal">Внутренняя память</string>
+    <string name="storage_sd_card">SD-карта</string>
     <string name="need_music_access_title">Нужен доступ к музыке</string>
     <string name="need_music_access_subtitle">Разрешите доступ к аудиофайлам, чтобы приложение нашло ваши треки.</string>
     <string name="need_music_access_picker_subtitle">Разрешите доступ к аудиофайлам, чтобы выбрать треки.</string>

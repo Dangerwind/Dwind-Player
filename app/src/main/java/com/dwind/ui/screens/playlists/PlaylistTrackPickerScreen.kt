@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,21 +46,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dwind.R
 import com.dwind.data.model.AudioItem
 import com.dwind.ui.components.EmptyState
 import com.dwind.ui.components.IconBadge
+import com.dwind.ui.components.folderLabel
+import com.dwind.ui.components.folderPathLabel
 import com.dwind.ui.rememberWindowSizeInfo
 import com.dwind.ui.viewmodel.FoldersBrowserViewModel
 import com.dwind.ui.viewmodel.SortMode
 import com.dwind.ui.viewmodel.SortOrder
-import java.io.File
 
 @Composable
 fun PlaylistTrackPickerScreen(
@@ -94,6 +99,15 @@ fun PlaylistTrackPickerScreen(
         if (!granted) {
             launcher.launch(permission)
         }
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshIfNeeded()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val addSelectedAndClose: () -> Unit = {
@@ -137,8 +151,11 @@ fun PlaylistTrackPickerScreen(
                 )
             }
             Text(
-                text = if (state.currentPath.isEmpty()) stringResource(R.string.select_tracks)
-                    else File(state.currentPath).name.ifEmpty { state.currentPath },
+                text = folderPathLabel(
+                    state.currentPath,
+                    state.volumePaths,
+                    stringResource(R.string.select_tracks)
+                ),
                 style = if (compactHeight) MaterialTheme.typography.titleMedium
                 else MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(start = 4.dp).weight(1f),
@@ -245,7 +262,7 @@ fun PlaylistTrackPickerScreen(
                             )
                             Column(modifier = Modifier.weight(1f).padding(start = 14.dp)) {
                                 Text(
-                                    text = if (folder.path == "/") stringResource(R.string.all_files) else folder.name,
+                                    text = folderLabel(folder),
                                     style = MaterialTheme.typography.titleSmall,
                                     maxLines = 1
                                 )
