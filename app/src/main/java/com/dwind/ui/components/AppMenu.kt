@@ -1,5 +1,8 @@
 package com.dwind.ui.components
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -196,13 +199,14 @@ fun AppOverflowMenu(
                 text = languageItemLabel
             ) {
                 // Язык применяется мгновенно через LocalizedContent в дереве
-                // Compose, поэтому пересоздавать активность не нужно.
-                // Меню закрываем: всплывающее окно держит собственный контекст
-                // и иначе осталось бы на прежнем языке до повторного открытия.
+                // Compose. Дополнительно пересоздаём активность: у всплывающих
+                // окон (меню, диалоги) собственный контекст окна, и без
+                // пересоздания они оставались бы на прежнем языке.
                 expanded = false
                 AppSettings.setLanguageMode(
                     if (isRussian) LanguageMode.ENGLISH else LanguageMode.RUSSIAN
                 )
+                context.findActivity()?.recreate()
             }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.menu_show_genre)) },
@@ -532,4 +536,11 @@ private fun BpmMeasurementDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         }
     )
+}
+
+/** Ближайшая активность в цепочке контекстов (нужна для пересоздания окна). */
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }

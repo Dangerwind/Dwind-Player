@@ -2,17 +2,20 @@ package com.dwind.ui.viewmodel
 
 import android.app.Application
 import android.net.Uri
+import android.os.Bundle
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.session.SessionCommand
 import com.dwind.data.local.AppDatabase
 import com.dwind.data.local.entity.PlaylistEntity
 import com.dwind.data.local.entity.PlaylistTrackCrossRef
 import com.dwind.data.local.entity.TrackEntity
 import com.dwind.data.model.AudioItem
 import com.dwind.playback.PlaybackConnection
+import com.dwind.playback.PlaybackService
 import com.dwind.settings.AppSettings
 import com.dwind.settings.SettingsState
 import kotlinx.coroutines.Dispatchers
@@ -351,6 +354,7 @@ class PlayerViewModel(app: Application) : AndroidViewModel(app) {
             ctrl.setMediaItems(desired, index, startPosition)
             ctrl.prepare()
             if (wasPlaying) ctrl.play()
+            requestShuffleReset()
         }
     }
 
@@ -384,11 +388,13 @@ class PlayerViewModel(app: Application) : AndroidViewModel(app) {
             metaByMediaId = queue.meta
             currentMediaIds = queue.items.map { it.mediaId }
             playableMediaIds = playable.map { it.id.toString() }.toSet()
-            ctrl.setMediaItems(queue.items)
             val index = playable.indexOfFirst { it.id == item.id }
-            if (index >= 0) ctrl.seekTo(index, 0)
+            ctrl.setMediaItems(queue.items, if (index >= 0) index else 0, 0L)
             ctrl.prepare()
             ctrl.play()
+            // Порядок перемешивания пересоберём после того, как сервис
+            // применит новую очередь: до этого команда может обогнать её.
+            requestShuffleReset()
         }
     }
 
@@ -419,11 +425,12 @@ class PlayerViewModel(app: Application) : AndroidViewModel(app) {
             metaByMediaId = queue.meta
             currentMediaIds = queue.items.map { it.mediaId }
             playableMediaIds = playable.map { it.id }.toSet()
-            ctrl.setMediaItems(queue.items)
             val index = playable.indexOfFirst { it.id == trackId }
-            if (index >= 0) ctrl.seekTo(index, 0)
+            ctrl.setMediaItems(queue.items, if (index >= 0) index else 0, 0L)
             ctrl.prepare()
             ctrl.play()
+            // См. playTrack: порядок перемешивания — после применения очереди.
+            requestShuffleReset()
         }
     }
 
@@ -645,7 +652,28 @@ class PlayerViewModel(app: Application) : AndroidViewModel(app) {
     
     fun toggleShuffle() {
         val ctrl = controller.value ?: return
-        ctrl.shuffleModeEnabled = !ctrl.shuffleModeEnabled
+        val enabled = !ctrl.shuffleModeEnabled
+        ctrl.shuffleModeEnabled = enabled
+        // Включили перемешивание — начинаем проход заново, с текущего трека:
+        // все оставшиеся треки должны сыграть по одному разу.
+        if (enabled) requestShuffleReset()
+    }
+
+    /**
+     * Просит сервис перемешать очередь заново, оставив текущий трек первым.
+     *
+     * Нужно после ручного выбора трека и при включении перемешивания. Иначе
+     * ExoPlayer продолжит прежний порядок, в котором часть треков уже
+     * «проиграна», и очередь оборвётся раньше времени. Сам сброс сервис
+     * применяет после того, как новая очередь и режим уже вступили в силу.
+     */
+    private fun requestShuffleReset() {
+        val ctrl = controller.value ?: return
+        if (!ctrl.shuffleModeEnabled) return
+        ctrl.sendCustomCommand(
+            SessionCommand(PlaybackService.RESET_SHUFFLE_COMMAND, Bundle.EMPTY),
+            Bundle.EMPTY
+        )
     }
     
     fun setRepeatMode() {
